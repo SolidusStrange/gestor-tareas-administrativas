@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#24282b" />
+  <meta name="description" content="Gestión administrativa de tareas operacionales y contables." />
+  <title>Gestión Administrativa | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="app-auth-pending">
+  <!-- ESTRUCTURA GENERAL: navegación lateral, cabecera y área principal de las vistas. -->
+  <!-- Bloqueo inicial: el Dashboard no muestra datos hasta confirmar sesión y RLS. -->
+  <div class="app-gate" id="app-gate" role="status" aria-live="polite">
+    <div class="app-gate-card">
+      <span class="app-gate-spinner" aria-hidden="true"></span>
+      <h2>Gestión Administrativa</h2>
+      <p id="app-gate-message">Comprobando tu sesión y cargando tus tareas…</p>
+      <button class="button button-primary hidden" id="app-gate-retry" type="button">Reintentar conexión</button>
+      <a class="button button-quiet hidden" id="app-gate-signin" href="login.html">Volver al inicio de sesión</a>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard" aria-label="Ir al dashboard">
+        <span class="brand-symbol"><span></span><span></span><span></span></span>
+        <span class="brand-name">GESTIÓN<span>ADMINISTRATIVA</span></span>
+      </a>
+      <div class="sidebar-section-label">ESPACIO DE TRABAJO</div>
+      <nav class="side-nav" aria-label="Navegación principal">
+        <button class="nav-item active" id="dashboard-nav" type="button" data-view="dashboard" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" id="archive-nav" type="button" data-view="archive">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 12h6"/></svg>
+          <span>Archivados</span>
+          <span class="nav-count" id="nav-archived-count">0</span>
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="storage-status" id="cloud-status"><span class="status-dot"></span><span id="cloud-status-text">Conectando con Supabase…</span></div>
+        <div class="sidebar-version">CONTROL DE TAREAS · V4.0</div>
+        <button class="logout-button" id="logout-button" type="button">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <!-- La fecha actual se mantiene visible en todas las secciones. -->
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong id="breadcrumb-current">Dashboard</strong></div>
+        <div class="topbar-actions">
+          <div class="today-display"><span id="user-email-label" class="user-email-label">Usuario</span><span class="today-label">HOY</span><strong id="current-date">--/--/----</strong></div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- DASHBOARD: vista única de trabajo con alta rápida dentro de cada área/categoría. -->
+        <section id="dashboard-view" aria-label="Dashboard">
+          <!-- RESUMEN SUPERIOR: tres tarjetas del mismo alto para lectura rápida. -->
+          <div class="dashboard-top-grid" aria-label="Resumen general de tareas">
+            <section class="analytics-card overview-card dashboard-top-card" aria-label="Progreso global">
+              <div class="overview-topline">
+                <div class="overview-title-wrap">
+                  <span class="metric-icon metric-icon-dark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6M4 18h16M7 14l4-4 3 2 5-6"/></svg></span>
+                  <div><div class="section-kicker">VISTA GENERAL</div><h2>Progreso global</h2></div>
+                </div>
+                <div class="overview-total"><strong id="overall-percent">0%</strong><span id="overall-detail">0 de 0 tareas completadas</span></div>
+              </div>
+              <div class="overview-progress-track" role="progressbar" aria-label="Progreso global" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overall-progress"><div class="overview-progress-fill" id="overall-progress-fill"></div></div>
+              <div class="group-progress-grid">
+                <div class="group-progress-item">
+                  <div class="group-progress-copy"><span class="group-progress-name"><i class="group-dot operational-dot"></i>Operacional</span><strong id="operational-percent">0%</strong></div>
+                  <div class="mini-progress-track"><div class="mini-progress-fill" id="operational-progress-fill"></div></div>
+                  <span class="group-progress-detail" id="operational-detail">0 de 0 completadas</span>
+                </div>
+                <div class="group-progress-item">
+                  <div class="group-progress-copy"><span class="group-progress-name"><i class="group-dot accounting-dot"></i>Contabilidad</span><strong id="accounting-percent">0%</strong></div>
+                  <div class="mini-progress-track"><div class="mini-progress-fill" id="accounting-progress-fill"></div></div>
+                  <span class="group-progress-detail" id="accounting-detail">0 de 0 completadas</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="analytics-card dashboard-top-card dashboard-risk-card" aria-label="Resumen de urgencias">
+              <div class="widget-heading">
+                <div><span class="section-kicker">CONTROL DE PLAZOS</span><h2>Estado de urgencia</h2></div>
+                <span class="widget-info" title="Las tareas completadas no se incluyen en estos indicadores." aria-label="Las tareas completadas no se incluyen en estos indicadores.">i</span>
+              </div>
+              <!-- Cada nivel de riesgo se representa como un gráfico de torta independiente. -->
+              <div class="risk-donut-grid">
+                <div class="status-donut-item yellow-status-card">
+                  <div class="status-donut" id="yellow-donut" role="img" aria-label="0 tareas en observación" style="background: conic-gradient(#e5b13d 0% 0%, #edf0f2 0% 100%);">
+                    <div class="status-donut-hole"><strong id="yellow-count">0</strong><span>tareas</span></div>
+                  </div>
+                  <div class="status-donut-copy">
+                    <strong>En observación</strong>
+                    <span><b id="yellow-share">0%</b> de pendientes</span>
+                  </div>
+                </div>
+                <div class="status-donut-item red-status-card">
+                  <div class="status-donut" id="red-donut" role="img" aria-label="0 tareas críticas" style="background: conic-gradient(#df555d 0% 0%, #edf0f2 0% 100%);">
+                    <div class="status-donut-hole"><strong id="red-count">0</strong><span>tareas</span></div>
+                  </div>
+                  <div class="status-donut-copy">
+                    <strong>Críticas</strong>
+                    <span><b id="red-share">0%</b> de pendientes</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="analytics-card dashboard-top-card category-count-card" aria-label="Cantidad de tareas por categoría">
+              <div class="widget-heading">
+                <div><span class="section-kicker">DISTRIBUCIÓN</span><h2>Tareas por categoría</h2></div>
+                <span class="category-count-total" id="category-count-total">0 tareas</span>
+              </div>
+              <div class="category-count-chart" id="category-count-chart" role="list" aria-label="Cantidad de tareas activas por categoría"></div>
+            </section>
+          </div>
+
+          <!-- DASHBOARD PRINCIPAL: Operacional ocupa dos tercios; Contabilidad queda en una columna vertical independiente a la derecha. -->
+          <div class="dashboard-main-grid" id="group-sections">
+            <section class="group-section operational-panel" data-group-id="operacional">
+              <header class="group-section-header">
+                <div class="group-heading-main"><span class="group-heading-mark operational-mark"></span><div><h2>Operacional</h2><p id="operational-summary">0 categorías · 0 tareas</p></div></div>
+                <div class="group-heading-actions">
+                  <button class="add-category-inline" type="button" data-add-category="operacional" title="Crear categoría operacional">+ Categoría</button>
+                  <span class="group-completion" id="operational-completion">0%</span>
+                  <button class="collapse-group-button" type="button" data-collapse-group="operacional" aria-expanded="true" title="Minimizar Operacional"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                </div>
+              </header>
+              <div class="category-grid" id="operacional-categories" data-category-container="operacional"></div>
+            </section>
+
+            <section class="group-section accounting-panel" data-group-id="contabilidad">
+              <header class="group-section-header">
+                <div class="group-heading-main"><span class="group-heading-mark accounting-mark"></span><div><h2>Contabilidad</h2><p id="accounting-summary">0 categorías · 0 tareas</p></div></div>
+                <div class="group-heading-actions">
+                  <button class="add-category-inline" type="button" data-add-category="contabilidad" title="Crear categoría contable">+ Categoría</button>
+                  <span class="group-completion" id="accounting-completion">0%</span>
+                  <button class="collapse-group-button" type="button" data-collapse-group="contabilidad" aria-expanded="true" title="Minimizar Contabilidad"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                </div>
+              </header>
+              <form class="accounting-add-task-form" id="accounting-add-task-form">
+                <select class="accounting-quick-category" id="accounting-quick-category" aria-label="Categoría contable"></select>
+                <input class="inline-task-name" id="accounting-quick-name" type="text" maxlength="120" placeholder="Nueva tarea contable..." aria-label="Nombre de la tarea contable" required />
+                <input class="inline-task-date" id="accounting-quick-date" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" aria-label="Fecha de referencia DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required />
+                <button class="inline-add-button" type="submit" title="Agregar tarea contable" aria-label="Agregar tarea contable">+</button>
+              </form>
+              <div class="accounting-list" id="contabilidad-list" aria-label="Tareas de contabilidad"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ÁREA INTERNA OCULTA: compatibilidad con utilidades heredadas; la gestión visible ocurre en el Dashboard. -->
+        <section id="tasks-view" class="tasks-view hidden" aria-hidden="true">
+          <button id="add-category-open" type="button" hidden></button>
+          <button id="add-task-open" type="button" hidden></button>
+          <span id="tasks-total-count">0</span><span id="tasks-pending-count">0</span><span id="tasks-completed-count">0</span><span id="tasks-risk-count">0</span>
+          <input id="task-search-input" type="search" />
+          <select id="task-group-filter"><option value="all">Todas</option><option value="operacional">Operacional</option><option value="contabilidad">Contabilidad</option></select>
+          <select id="task-category-filter"><option value="all">Todas</option></select>
+          <select id="task-status-filter"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="completed">Completadas</option></select>
+          <ul id="task-manager-list"></ul><div id="task-manager-empty" class="hidden"></div>
+        </section>
+
+        <!-- ARCHIVADOS: historial con categoría, fecha objetivo, finalización y archivo. -->
+        <section id="archive-view" class="archive-view hidden" aria-label="Tareas archivadas">
+          <div class="archive-summary-card"><div class="archive-summary-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 12h6"/></svg></div><div><span class="section-kicker">HISTORIAL</span><h2 id="archive-total">0 tareas archivadas</h2><p>Las tareas conservan su categoría, fecha registrada y estado de finalización.</p></div></div>
+          <div id="archive-list" class="archive-list"></div>
+        </section>
+      </main>
+      <footer class="footer-note"><span class="footer-indicator"></span>Los cambios se guardan automáticamente en este navegador.</footer>
+    </div>
+  </div>
+
+  <!-- PLANTILLAS: tarjetas del dashboard, filas y registros archivados. -->
+  <template id="category-template">
+    <article class="category-card">
+      <header class="category-card-header">
+        <div class="category-title-area"><span class="category-icon"></span><div class="category-title-copy"><h3 class="category-title"></h3><p class="category-meta"></p></div></div>
+        <div class="category-header-trailing"><span class="category-priority-indicators"></span><button class="category-drag-handle" type="button" draggable="true" title="Arrastrar para mover u ordenar categoría" aria-label="Arrastrar categoría">⠿</button></div>
+      </header>
+      <div class="category-progress-row">
+        <div class="category-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="category-progress-fill"></div></div>
+        <span class="category-percent">0%</span>
+      </div>
+      <div class="category-summary-line"><span class="category-pending-count">0 pendientes</span><span class="category-completed-count">0 hechas</span></div>
+      <ul class="category-task-preview task-list" aria-label="Tareas de la categoría"></ul>
+      <form class="inline-add-task-form" data-inline-category-id="">
+        <input class="inline-task-name" type="text" maxlength="120" placeholder="Nueva tarea..." aria-label="Nombre de la nueva tarea" required />
+        <input class="inline-task-date" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" aria-label="Fecha de referencia DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required />
+        <button class="inline-add-button" type="submit" title="Agregar tarea" aria-label="Agregar tarea">+</button>
+      </form>
+    </article>
+  </template>
+
+  <template id="accounting-task-template">
+    <li class="accounting-task-row task-item" draggable="true">
+      <span class="task-drag-handle accounting-drag-handle" aria-hidden="true" title="Arrastrar tarea">⠿</span>
+      <label class="task-main accounting-task-main">
+        <input class="task-checkbox" type="checkbox" />
+        <span class="custom-checkbox" aria-hidden="true"><span>✓</span></span>
+        <span class="accounting-task-copy"><strong class="task-name accounting-task-name"></strong><small class="accounting-task-subtitle"></small></span>
+      </label>
+      <div class="accounting-task-trailing"><span class="dashboard-task-date"></span><span class="task-urgency-icon hidden" role="img" aria-label=""></span><button class="task-action edit-task-button" type="button" title="Editar tarea" aria-label="Editar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/></svg></button><button class="task-action archive-task-button" type="button" title="Archivar tarea" aria-label="Archivar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 12h6"/></svg></button></div>
+    </li>
+  </template>
+
+  <template id="task-template">
+    <li class="task-item" draggable="true">
+      <span class="task-drag-handle" aria-hidden="true" title="Arrastrar para reordenar o mover esta tarea">⠿</span>
+      <label class="task-main"><input class="task-checkbox" type="checkbox" /><span class="custom-checkbox" aria-hidden="true"><span>✓</span></span><span class="task-name"></span></label>
+      <div class="task-details"><div class="task-date-row"><span class="task-date-label"></span><span class="task-urgency-icon hidden" role="img" aria-label=""><svg class="urgency-symbol urgency-yellow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 22 20.4H2L12 3.6Z"/><path d="M12 9v5.2M12 17.5h.01"/></svg><svg class="urgency-symbol urgency-red-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 7.8v8.4L12 21l-9-4.8V7.8L12 3Z"/><path d="M12 8v5.5M12 17h.01"/></svg></span></div><span class="task-completed-at"></span></div>
+      <div class="task-actions"><button class="task-action edit-task-button" type="button" title="Editar tarea" aria-label="Editar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/></svg></button><button class="task-action archive-task-button" type="button" title="Archivar tarea" aria-label="Archivar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 12h6"/></svg></button></div>
+    </li>
+  </template>
+
+  <template id="task-manager-row-template">
+    <li class="task-manager-row">
+      <div class="manager-task-cell"><span class="manager-drag-handle" draggable="true" title="Arrastrar tarea" aria-hidden="true">⠿</span><div class="manager-task-copy"><strong class="manager-task-title"></strong><small class="manager-task-completed"></small></div></div>
+      <div class="manager-category-cell"><span class="manager-area-pill"></span><strong class="manager-category-name"></strong></div>
+      <div class="manager-date-cell"></div>
+      <div class="manager-risk-cell"><span class="manager-risk-icon hidden" role="img" aria-label=""></span></div>
+      <label class="manager-status-cell"><input class="manager-task-checkbox" type="checkbox" /><span class="manager-status-text">Pendiente</span></label>
+      <div class="manager-actions-cell"><button class="task-action manager-edit-button" type="button" title="Editar tarea" aria-label="Editar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/></svg></button><button class="task-action manager-archive-button" type="button" title="Archivar tarea" aria-label="Archivar tarea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3zM9 12h6"/></svg></button></div>
+    </li>
+  </template>
+
+  <template id="archive-category-template">
+    <section class="archive-category"><header class="archive-category-header"><div><h2 class="archive-category-title"></h2><p class="archive-category-group"></p></div><span class="archive-category-count"></span></header><ul class="archived-list"></ul></section>
+  </template>
+  <template id="archived-task-template">
+    <li class="archived-item"><div class="archived-task-main"><strong class="archived-name"></strong><span class="archived-date"></span><span class="archived-completion"></span></div><div class="archived-task-trailing"><div class="archived-meta"></div><button class="restore-button" type="button">Restaurar</button></div></li>
+  </template>
+
+  <!-- MODAL DE ALTA: selección de área, categoría dependiente, nombre y fecha. -->
+  <dialog class="app-dialog" id="task-create-dialog">
+    <form id="task-create-form">
+      <div class="dialog-heading"><div><span class="section-kicker">NUEVA ACTIVIDAD</span><h2>Agregar tarea</h2></div><button class="dialog-close" type="button" data-close-dialog="task-create-dialog" aria-label="Cerrar">×</button></div>
+      <label class="form-field"><span>Nombre de la tarea</span><input id="new-task-name" type="text" maxlength="120" placeholder="Ej. Rendición Isabella" autocomplete="off" required /></label>
+      <label class="form-field"><span>Área</span><select id="new-task-group" required><option value="operacional">Operacional</option><option value="contabilidad">Contabilidad</option></select></label>
+      <label class="form-field"><span>Categoría</span><select id="new-task-category" required></select></label>
+      <label class="form-field"><span>Fecha de referencia (DD/MM/YYYY)</span><input id="new-task-date" type="text" inputmode="numeric" maxlength="10" pattern="\d{2}/\d{2}/\d{4}" placeholder="DD/MM/YYYY" title="Usa el formato DD/MM/YYYY" required /></label>
+      <p class="dialog-hint" id="new-task-deadline-hint">El plazo y la urgencia se calcularán automáticamente según la categoría seleccionada.</p>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog="task-create-dialog">Cancelar</button><button class="button button-primary" type="submit">Agregar tarea</button></div>
+    </form>
+  </dialog>
+
+  <!-- MODAL DE EDICIÓN: permite cambiar nombre, fecha, área y categoría. -->
+  <dialog class="app-dialog" id="task-dialog">
+    <form id="task-edit-form">
+      <div class="dialog-heading"><div><span class="section-kicker">TAREA</span><h2 id="task-dialog-title">Editar tarea</h2></div><button class="dialog-close" type="button" data-close-dialog="task-dialog" aria-label="Cerrar">×</button></div>
+      <label class="form-field"><span>Nombre de la tarea</span><input id="edit-task-name" type="text" maxlength="120" required /></label>
+      <label class="form-field"><span>Área</span><select id="edit-task-group" required><option value="operacional">Operacional</option><option value="contabilidad">Contabilidad</option></select></label>
+      <label class="form-field"><span>Categoría</span><select id="edit-task-category" required></select></label>
+      <label class="form-field"><span>Fecha de referencia (DD/MM/YYYY)</span><input id="edit-task-date" type="text" inputmode="numeric" maxlength="10" pattern="\d{2}/\d{2}/\d{4}" placeholder="DD/MM/YYYY" title="Usa el formato DD/MM/YYYY" required /></label>
+      <p class="dialog-hint">Si cambias el área o la categoría, la tarea se trasladará y utilizará el plazo de la nueva categoría.</p>
+      <div class="dialog-actions dialog-actions-between"><button class="button button-danger" id="task-delete-button" type="button">Eliminar tarea</button><div class="dialog-actions-end"><button class="button button-quiet" type="button" data-close-dialog="task-dialog">Cancelar</button><button class="button button-primary" type="submit">Guardar cambios</button></div></div>
+    </form>
+  </dialog>
+
+  <!-- MODAL DE CATEGORÍA: permite ampliar las subcategorías y definir su plazo. -->
+  <dialog class="app-dialog" id="category-dialog">
+    <form id="category-create-form">
+      <div class="dialog-heading"><div><span class="section-kicker">CONFIGURACIÓN</span><h2>Nueva categoría</h2></div><button class="dialog-close" type="button" data-close-dialog="category-dialog" aria-label="Cerrar">×</button></div>
+      <label class="form-field"><span>Nombre de la categoría</span><input id="new-category-name" type="text" maxlength="40" placeholder="Ej. Conciliaciones" required /></label>
+      <label class="form-field"><span>Área principal</span><select id="new-category-group"><option value="operacional">Operacional</option><option value="contabilidad">Contabilidad</option></select></label>
+      <label class="form-field"><span>Plazo de referencia (días)</span><input id="new-category-days" type="number" min="1" max="3650" value="6" required /></label>
+      <p class="dialog-hint">El plazo define cuándo una tarea pasa de amarillo (en observación) a rojo (crítica).</p>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" data-close-dialog="category-dialog">Cancelar</button><button class="button button-primary" type="submit">Crear categoría</button></div>
+    </form>
+  </dialog>
+
+  <!-- JavaScript: carga/migración de datos, renderizado, formularios rápidos y acciones. -->
+  <!-- supabase-js se utiliza como biblioteca UMD; la clave configurada es publicable. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

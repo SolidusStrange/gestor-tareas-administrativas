@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#25292c" />
+  <title>Acceso | Gestión Administrativa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <aside class="auth-brand-panel">
+      <a class="auth-brand" href="login.html" aria-label="Gestión Administrativa">
+        <span class="auth-brand-symbol"><i></i><i></i><i></i></span>
+        <span>GESTIÓN <small>ADMINISTRATIVA</small></span>
+      </a>
+      <div class="auth-brand-copy">
+        <span class="auth-eyebrow">ESPACIO PRIVADO</span>
+        <h1>Organización y control de actividades.</h1>
+        <p>Centraliza tareas operacionales y contables, controla plazos y consulta tu avance desde cualquier equipo.</p>
+      </div>
+      <div class="auth-brand-footer"><span></span> Acceso privado para usuarios invitados</div>
+    </aside>
+
+    <section class="auth-form-panel">
+      <div class="auth-mobile-brand">
+        <span class="auth-brand-symbol"><i></i><i></i><i></i></span>
+        <strong>GESTIÓN <small>ADMINISTRATIVA</small></strong>
+      </div>
+
+      <div id="login-view">
+        <div class="auth-heading">
+          <span class="auth-eyebrow">BIENVENIDO</span>
+          <h2>Iniciar sesión</h2>
+          <p>Ingresa con el correo y contraseña de tu invitación.</p>
+        </div>
+        <form id="login-form" class="auth-form" autocomplete="on">
+          <label class="auth-field"><span>Correo electrónico</span><input type="email" name="email" placeholder="nombre@empresa.cl" autocomplete="username" autocapitalize="none" required /></label>
+          <label class="auth-field"><span>Contraseña</span><input type="password" name="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required /></label>
+          <button class="auth-submit" id="login-submit" type="submit">Ingresar <span aria-hidden="true">→</span></button>
+        </form>
+      </div>
+
+      <div id="password-setup-view" class="hidden">
+        <div class="auth-heading">
+          <span class="auth-eyebrow">PRIMER ACCESO</span>
+          <h2>Configurar contraseña</h2>
+          <p>Elige una contraseña para tu cuenta antes de continuar.</p>
+        </div>
+        <form id="password-setup-form" class="auth-form" autocomplete="on">
+          <label class="auth-field"><span>Nueva contraseña</span><input type="password" name="password" autocomplete="new-password" minlength="8" required /></label>
+          <label class="auth-field"><span>Confirmar contraseña</span><input type="password" name="password-confirm" autocomplete="new-password" minlength="8" required /></label>
+          <button class="auth-submit" id="password-setup-submit" type="submit">Guardar contraseña <span aria-hidden="true">→</span></button>
+        </form>
+      </div>
+
+      <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite">El acceso se habilita mediante invitación del administrador.</p>
+      <div class="auth-security-note"><span class="auth-lock" aria-hidden="true">✓</span> Tus tareas y categorías son privadas de tu cuenta.</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
