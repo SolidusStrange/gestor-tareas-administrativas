@@ -44,7 +44,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="storage-status" id="cloud-status"><span class="status-dot"></span><span id="cloud-status-text">Conectando con Supabase…</span></div>
-        <div class="sidebar-version">CONTROL DE TAREAS · V4.1</div>
+        <div class="sidebar-version">CONTROL DE TAREAS · V4.2</div>
         <button class="logout-button" id="logout-button" type="button">Cerrar sesión</button>
       </div>
     </aside>
@@ -59,7 +59,7 @@
       </header>
 
       <main class="main-content">
-        <!-- DASHBOARD: vista única de trabajo con alta rápida dentro de cada área/categoría. -->
+        <!-- DASHBOARD: vista única de trabajo con formulario centralizado de alta. -->
         <section id="dashboard-view" aria-label="Dashboard">
           <!-- RESUMEN SUPERIOR: tres tarjetas del mismo alto para lectura rápida. -->
           <div class="dashboard-top-grid" aria-label="Resumen general de tareas">
@@ -123,6 +123,22 @@
             </section>
           </div>
 
+          <!-- ALTA RÁPIDA CENTRALIZADA: elegir cualquier categoría y registrar la tarea desde un único lugar. -->
+          <section class="dashboard-quick-add-card" aria-label="Agregar tarea">
+            <div class="dashboard-quick-add-title">
+              <span class="section-kicker">ALTA RÁPIDA</span>
+              <h2>Nueva tarea</h2>
+            </div>
+            <form class="dashboard-quick-add-form" id="dashboard-quick-add-form">
+              <select class="dashboard-quick-category" id="dashboard-quick-category" aria-label="Seleccionar categoría" required>
+                <option value="">Seleccionar categoría</option>
+              </select>
+              <input class="dashboard-quick-name" id="dashboard-quick-name" type="text" maxlength="120" placeholder="Nombre de la tarea..." aria-label="Nombre de la tarea" autocomplete="off" required />
+              <input class="dashboard-quick-date" id="dashboard-quick-date" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" aria-label="Fecha de referencia DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required />
+              <button class="inline-add-button dashboard-quick-submit" type="submit" title="Agregar tarea" aria-label="Agregar tarea">+</button>
+            </form>
+          </section>
+
           <!-- DASHBOARD PRINCIPAL: Operacional ocupa dos tercios; Contabilidad queda en una columna vertical independiente a la derecha. -->
           <div class="dashboard-main-grid" id="group-sections">
             <section class="group-section operational-panel" data-group-id="operacional">
@@ -146,12 +162,13 @@
                   <button class="collapse-group-button" type="button" data-collapse-group="contabilidad" aria-expanded="true" title="Minimizar Contabilidad"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
                 </div>
               </header>
-              <form class="accounting-add-task-form" id="accounting-add-task-form">
-                <select class="accounting-quick-category" id="accounting-quick-category" aria-label="Categoría contable"></select>
-                <input class="inline-task-name" id="accounting-quick-name" type="text" maxlength="120" placeholder="Nueva tarea contable..." aria-label="Nombre de la tarea contable" required />
-                <input class="inline-task-date" id="accounting-quick-date" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" aria-label="Fecha de referencia DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required />
-                <button class="inline-add-button" type="submit" title="Agregar tarea contable" aria-label="Agregar tarea contable">+</button>
-              </form>
+              <!-- Progreso agregado de Contabilidad: completadas respecto del total activo. -->
+              <div class="accounting-progress-wrap">
+                <div class="accounting-progress-track" id="accounting-panel-progress" role="progressbar" aria-label="Progreso de Contabilidad" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="accounting-progress-fill" id="accounting-panel-progress-fill"></div>
+                </div>
+                <span class="accounting-progress-detail" id="accounting-panel-progress-detail">0 de 0 completadas</span>
+              </div>
               <div class="accounting-list" id="contabilidad-list" aria-label="Tareas de contabilidad"></div>
             </section>
           </div>
@@ -175,7 +192,7 @@
           <div id="archive-list" class="archive-list"></div>
         </section>
       </main>
-      <footer class="footer-note"><span class="footer-indicator"></span>Los cambios se guardan automáticamente en este navegador.</footer>
+      <footer class="footer-note"><span class="footer-indicator"></span>Los cambios se sincronizan automáticamente con Supabase.</footer>
     </div>
   </div>
 
@@ -192,11 +209,7 @@
       </div>
       <div class="category-summary-line"><span class="category-pending-count">0 pendientes</span><span class="category-completed-count">0 hechas</span></div>
       <ul class="category-task-preview task-list" aria-label="Tareas de la categoría"></ul>
-      <form class="inline-add-task-form" data-inline-category-id="">
-        <input class="inline-task-name" type="text" maxlength="120" placeholder="Nueva tarea..." aria-label="Nombre de la nueva tarea" required />
-        <input class="inline-task-date" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" aria-label="Fecha de referencia DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required />
-        <button class="inline-add-button" type="submit" title="Agregar tarea" aria-label="Agregar tarea">+</button>
-      </form>
+
     </article>
   </template>
 

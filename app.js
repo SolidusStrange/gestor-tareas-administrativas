@@ -335,8 +335,8 @@ function updateProgressElement(fillElement, percent) {
 
 // ============================================================================
 // 5. RENDERIZADO DEL DASHBOARD
-//    Operacional se organiza en tarjetas con alta rápida; Contabilidad aparece
-//    como una lista vertical y muestra la categoría bajo cada tarea.
+//    Operacional se organiza en tarjetas; Contabilidad aparece como una lista
+//    vertical y el alta de tareas se centraliza en un único formulario global.
 // ============================================================================
 function updateOverview() {
   const activeTasks = allActiveTasks().map(item => item.task);
@@ -358,6 +358,15 @@ function updateOverview() {
     document.getElementById(`${summary.key}-detail`).textContent = `${done} de ${summary.tasks.length} completadas`;
     updateProgressElement(document.getElementById(`${summary.key}-progress-fill`), percent);
     document.getElementById(`${summary.key}-completion`).textContent = `${percent}%`;
+    if (summary.id === "contabilidad") {
+      const accountingTrack = document.getElementById("accounting-panel-progress");
+      const accountingFill = document.getElementById("accounting-panel-progress-fill");
+      accountingTrack.setAttribute("aria-valuenow", String(percent));
+      accountingTrack.setAttribute("aria-label", `Progreso de Contabilidad: ${percent}%`);
+      accountingFill.style.width = `${percent}%`;
+      accountingFill.style.backgroundColor = progressColor(percent);
+      document.getElementById("accounting-panel-progress-detail").textContent = `${done} de ${summary.tasks.length} completadas`;
+    }
     const categoriesInGroup = state.categories.filter(category => category.groupId === summary.id);
     document.getElementById(`${summary.key}-summary`).textContent = `${categoriesInGroup.length} categorías · ${summary.tasks.length} tareas`;
   }
@@ -416,7 +425,7 @@ function setAnimatedCategoryProgress(track, fill, percent, name) {
   fill.classList.add("progress-animate");
 }
 
-// Renderiza una tarjeta operacional con todas sus tareas y un formulario de alta compacto.
+// Renderiza una tarjeta operacional; las tareas se agregan desde el formulario global.
 function renderCategory(category) {
   const stats = getCategoryTaskStats(category);
   const { tasks, pending, completed, yellow, red } = stats;
@@ -453,9 +462,6 @@ function renderCategory(category) {
     taskList.appendChild(empty);
   }
 
-  const form = card.querySelector(".inline-add-task-form");
-  form.dataset.inlineCategoryId = category.id;
-  form.querySelector(".inline-task-date").value = formatDate(dateKey());
   return fragment;
 }
 
@@ -563,11 +569,44 @@ function renderAccountingTask(task, category, urgency) {
   checkbox.dataset.categoryId = category.id;
   checkbox.setAttribute("aria-label", `${task.completed ? "Marcar pendiente" : "Completar"}: ${task.text}`);
   row.querySelector(".accounting-task-name").textContent = task.text;
-  const completedAt = task.completedAt ? ` · Completada ${formatSavedTimestamp(task.completedAt)}` : "";
-  row.querySelector(".accounting-task-subtitle").textContent = `${category.name} · ${formatDate(task.dueDate)}${completedAt}`;
+  row.querySelector(".accounting-task-subtitle").textContent = `${category.name} · ${formatDate(task.dueDate)}`;
+  if (task.completedAt) {
+    const completedAt = document.createElement("small");
+    completedAt.className = "accounting-task-completion";
+    completedAt.textContent = `Completada: ${formatSavedTimestamp(task.completedAt)}`;
+    row.querySelector(".accounting-task-copy").appendChild(completedAt);
+  }
   const urgencyIcon = createUrgencyIcon(urgency, category);
   row.querySelector(".accounting-task-trailing").replaceChild(urgencyIcon, row.querySelector(".accounting-task-trailing .task-urgency-icon"));
   return fragment;
+}
+
+// Mantiene el formulario único de alta con todas las categorías del usuario.
+// Las categorías se agrupan por área para que el destino sea inequívoco.
+function refreshDashboardQuickCategoryOptions() {
+  const select = document.getElementById("dashboard-quick-category");
+  const previousCategory = select.value;
+  select.replaceChildren(new Option("Seleccionar categoría", ""));
+
+  for (const [groupId, label] of [["operacional", "Operacional"], ["contabilidad", "Contabilidad"]]) {
+    const categories = state.categories.filter(category => category.groupId === groupId);
+    if (!categories.length) continue;
+    const group = document.createElement("optgroup");
+    group.label = label;
+    for (const category of categories) {
+      group.appendChild(new Option(category.name, category.id));
+    }
+    select.appendChild(group);
+  }
+
+  if (state.categories.some(category => category.id === previousCategory)) {
+    select.value = previousCategory;
+  } else {
+    select.value = "";
+  }
+
+  const dateInput = document.getElementById("dashboard-quick-date");
+  if (!dateInput.value) dateInput.value = formatDate(dateKey());
 }
 
 // Actualiza ambas áreas y los indicadores de riesgo al cambiar cualquier tarea.
@@ -598,13 +637,7 @@ function renderDashboard() {
     button.title = collapsed ? `Expandir ${groupId}` : `Minimizar ${groupId}`;
   }
 
-  const accountingSelect = document.getElementById("accounting-quick-category");
-  const previousCategory = accountingSelect.value;
-  accountingSelect.replaceChildren();
-  const accountingCategories = state.categories.filter(category => category.groupId === "contabilidad");
-  for (const category of accountingCategories) accountingSelect.add(new Option(category.name, category.id));
-  if (accountingCategories.some(category => category.id === previousCategory)) accountingSelect.value = previousCategory;
-  document.getElementById("accounting-quick-date").value = formatDate(dateKey());
+  refreshDashboardQuickCategoryOptions();
 
   updateOverview();
   renderCategoryBarChart();
@@ -1129,37 +1162,31 @@ categoryGrid.addEventListener("change", event => {
   if (checkbox) toggleTask(checkbox.dataset.categoryId, checkbox.dataset.taskId, checkbox.checked);
 });
 
-categoryGrid.addEventListener("submit", event => {
-  const operationalForm = event.target.closest(".inline-add-task-form");
-  const accountingForm = event.target.closest(".accounting-add-task-form");
-  if (!operationalForm && !accountingForm) return;
+// Alta rápida única: la categoría elegida determina el área y el destino de la tarea.
+document.getElementById("dashboard-quick-add-form").addEventListener("submit", event => {
   event.preventDefault();
-
-  const categoryId = operationalForm
-    ? operationalForm.dataset.inlineCategoryId
-    : document.getElementById("accounting-quick-category").value;
-  const nameInput = operationalForm
-    ? operationalForm.querySelector(".inline-task-name")
-    : document.getElementById("accounting-quick-name");
-  const dateInput = operationalForm
-    ? operationalForm.querySelector(".inline-task-date")
-    : document.getElementById("accounting-quick-date");
+  const categoryId = document.getElementById("dashboard-quick-category").value;
+  const nameInput = document.getElementById("dashboard-quick-name");
+  const dateInput = document.getElementById("dashboard-quick-date");
   const name = nameInput.value.trim();
   const dueDate = parseDisplayDate(dateInput.value);
 
-  if (!name || !dueDate) {
-    alert("Escribe el nombre y una fecha válida en formato DD/MM/YYYY.");
-    dateInput.focus();
+  if (!categoryId) {
+    alert("Selecciona la categoría donde quieres registrar la tarea.");
+    document.getElementById("dashboard-quick-category").focus();
     return;
   }
+  if (!name || !dueDate) {
+    alert("Escribe el nombre y una fecha válida en formato DD/MM/YYYY.");
+    if (!name) nameInput.focus();
+    else dateInput.focus();
+    return;
+  }
+
   if (addTask(categoryId, name, dueDate)) {
-    if (operationalForm) {
-      const input = document.querySelector(`[data-inline-category-id="${CSS.escape(categoryId)}"] .inline-task-name`);
-      input?.focus();
-    } else {
-      document.getElementById("accounting-quick-name").value = "";
-      document.getElementById("accounting-quick-name").focus();
-    }
+    nameInput.value = "";
+    dateInput.value = formatDate(dateKey());
+    nameInput.focus();
   }
 });
 

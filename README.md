@@ -1,4 +1,4 @@
-# Gestor de Tareas Administrativas — publicación GitHub Pages
+# Gestor de Tareas Administrativas — V4.2
 
 Aplicación estática HTML/CSS/JavaScript conectada a Supabase Auth y PostgreSQL.
 
@@ -46,7 +46,7 @@ La ruta `login.html` como Site URL permite que los enlaces de invitación abran 
 Para publicar cambios futuros, reemplaza los archivos de la raíz del repositorio y haz commit/push. GitHub Pages volverá a desplegar la versión nueva. Los registros permanecen en Supabase y no se reemplazan al actualizar la interfaz.
 
 
-## V4.1 — Personalización tipográfica
+## Personalización tipográfica
 
 Se agregó al final de `styles.css` una sección llamada `V4.1 — PERSONALIZACIÓN TIPOGRÁFICA CENTRALIZADA`.
 
@@ -62,6 +62,7 @@ Para cambiar los tamaños, modifica los valores de las variables CSS del bloque 
 | `--ui-category-summary` | Resumen de categoría | 10px |
 | `--ui-task-name` | Nombre de tarea Operacional | 13px |
 | `--ui-task-date` | Fecha de tarea Operacional | 10px |
+| `--ui-task-completion` | Texto «Completada: fecha y hora» | 10.5px |
 | `--ui-accounting-task-name` | Nombre de tarea Contabilidad | 13px |
 | `--ui-accounting-subtitle` | Subcategoría de Contabilidad | 10px |
 | `--ui-chart-heading` | Títulos de gráficos | 14px |
@@ -75,3 +76,17 @@ Los tamaños móviles tienen valores propios en los bloques `@media` inmediatame
 ### Actualizar GitHub Pages
 
 Reemplaza en la raíz del repositorio `styles.css`, `index.html` y `README.md` por los de esta versión y realiza un commit. La base de datos Supabase no se modifica.
+
+
+## V4.2 — alta centralizada y progreso de Contabilidad
+
+- El alta de tareas se realiza desde un único formulario en el Dashboard.
+- El selector agrupa categorías por Operacional y Contabilidad; el identificador de categoría seleccionado determina el destino.
+- Se eliminaron los formularios repetidos dentro de cada tarjeta operacional y el formulario independiente de Contabilidad.
+- Contabilidad ahora muestra una barra agregada de avance y el detalle de tareas completadas.
+- El texto `Completada: DD/MM/YYYY HH:mm` tiene mayor tamaño, peso y contraste en ambas áreas.
+- La persistencia y autenticación siguen usando Supabase; no se modificó el esquema de PostgreSQL ni las políticas RLS.
+
+### Actualización de GitHub Pages
+
+Reemplaza `index.html`, `styles.css`, `app.js` y `README.md` en la raíz del repositorio por los archivos de esta versión. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js` y `.nojekyll` de la versión conectada actual. No ejecutes nuevamente los scripts SQL: esta actualización no cambia la base de datos.
