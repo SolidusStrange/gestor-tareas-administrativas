@@ -1737,3 +1737,212 @@ body.app-auth-pending .app-shell { visibility: hidden; }
 .user-email-label { max-width: 220px; overflow: hidden; color: #73818c; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .storage-status.status-error { color: #e18b8b; }
 @media (max-width: 760px) { .user-email-label { max-width: 125px; } }
+
+/* ========================================================================== */
+/* V4.1 — PERSONALIZACIÓN TIPOGRÁFICA CENTRALIZADA.                           */
+/*                                                                          */
+/* Para ajustar la letra del Dashboard, modifica únicamente los valores     */
+/* de :root en este bloque. Los selectores de abajo aplican esos valores    */
+/* a Operacional, Contabilidad, gráficos, navegación y formularios.         */
+/* login.css se mantiene independiente para no alterar la pantalla de acceso. */
+/* ========================================================================== */
+
+:root {
+  /* Navegación y cabecera */
+  --ui-nav-item: 13px;
+  --ui-nav-secondary: 10px;
+  --ui-breadcrumb: 12px;
+  --ui-current-date: 12px;
+
+  /* Títulos y detalles de las áreas */
+  --ui-area-title: 16px;
+  --ui-area-subtitle: 10px;
+  --ui-category-title: 13px;
+  --ui-category-meta: 10px;
+  --ui-category-summary: 10px;
+
+  /* Tareas de Operacional */
+  --ui-task-name: 13px;
+  --ui-task-date: 10px;
+  --ui-quick-input: 11px;
+  --ui-quick-date: 10px;
+
+  /* Tareas de Contabilidad */
+  --ui-accounting-task-name: 13px;
+  --ui-accounting-subtitle: 10px;
+
+  /* Gráficos y resumen superior */
+  --ui-chart-heading: 14px;
+  --ui-chart-kicker: 8px;
+  --ui-chart-value: 10px;
+  --ui-chart-label: 9px;
+  --ui-risk-label: 10px;
+  --ui-risk-detail: 9px;
+
+  /* Ventanas de edición y formularios */
+  --ui-form-label: 11px;
+  --ui-form-input: 14px;
+}
+
+/* Navegación lateral y cabecera superior. */
+.nav-item { font-size: var(--ui-nav-item); }
+.sidebar-section-label,
+.sidebar-version { font-size: var(--ui-nav-secondary); }
+.storage-status { font-size: var(--ui-nav-secondary); }
+.breadcrumb { font-size: var(--ui-breadcrumb); }
+.today-display strong { font-size: var(--ui-current-date); }
+
+/* Títulos de Operacional y Contabilidad: misma jerarquía visual. */
+.dashboard-main-grid .group-heading-main h2 {
+  font-size: var(--ui-area-title);
+}
+.dashboard-main-grid .group-heading-main p {
+  font-size: var(--ui-area-subtitle);
+}
+.dashboard-main-grid .group-completion,
+.dashboard-main-grid .add-category-inline {
+  font-size: 10px;
+}
+
+/* Tarjetas de Operacional: nombre de categoría, resumen y tareas. */
+.operational-panel .category-title {
+  font-size: var(--ui-category-title);
+}
+.operational-panel .category-meta {
+  font-size: var(--ui-category-meta);
+}
+.operational-panel .category-summary-line {
+  font-size: var(--ui-category-summary);
+}
+.operational-panel .category-percent,
+.operational-panel .category-total-count,
+.operational-panel .category-open-tasks {
+  font-size: 10px;
+}
+.operational-panel .category-priority-count {
+  font-size: 9px;
+}
+.operational-panel .dashboard-task-row {
+  min-height: 31px;
+}
+.operational-panel .dashboard-task-name {
+  font-size: var(--ui-task-name) !important;
+  line-height: 1.3;
+}
+.operational-panel .dashboard-task-date {
+  font-size: var(--ui-task-date);
+}
+.operational-panel .category-empty-note {
+  font-size: 10px;
+}
+.operational-panel .inline-task-name {
+  font-size: var(--ui-quick-input);
+}
+.operational-panel .inline-task-date {
+  font-size: var(--ui-quick-date);
+}
+
+/* Lista de Contabilidad: tarea destacada y subcategoría claramente legible. */
+.accounting-panel .accounting-task-row {
+  min-height: 52px;
+}
+.accounting-panel .accounting-task-name {
+  font-size: var(--ui-accounting-task-name);
+  line-height: 1.3;
+}
+.accounting-panel .accounting-task-subtitle {
+  font-size: var(--ui-accounting-subtitle);
+}
+.accounting-panel .accounting-quick-category {
+  font-size: 10px;
+}
+.accounting-panel .inline-task-name {
+  font-size: var(--ui-quick-input);
+}
+.accounting-panel .inline-task-date {
+  font-size: var(--ui-quick-date);
+}
+.accounting-panel .accounting-empty-note {
+  font-size: 10px;
+}
+
+/* Resumen superior: encabezados, porcentajes y leyendas de los gráficos. */
+.dashboard-top-grid .overview-title-wrap h2,
+.dashboard-top-grid .widget-heading h2 {
+  font-size: var(--ui-chart-heading);
+}
+.dashboard-top-grid .overview-title-wrap .section-kicker,
+.dashboard-top-grid .widget-heading .section-kicker {
+  font-size: var(--ui-chart-kicker);
+}
+.dashboard-top-grid .group-progress-name,
+.dashboard-top-grid .group-progress-copy strong {
+  font-size: 10px;
+}
+.dashboard-top-grid .group-progress-detail {
+  font-size: 9px;
+}
+.dashboard-top-grid .overview-total span {
+  font-size: 9px;
+}
+.status-donut-item .status-donut-copy > strong {
+  font-size: var(--ui-risk-label);
+}
+.status-donut-item .status-donut-copy > span {
+  font-size: var(--ui-risk-detail);
+}
+.category-count-value {
+  font-size: var(--ui-chart-value);
+}
+.category-count-label {
+  font-size: var(--ui-chart-label);
+  line-height: 1.15;
+}
+
+/* Modales de alta y edición: etiquetas y campos más fáciles de leer. */
+.form-field {
+  font-size: var(--ui-form-label);
+}
+.form-field input,
+.form-field select {
+  font-size: var(--ui-form-input);
+}
+
+/* Ajustes específicos para móvil: conserva legibilidad sin comprimir las filas. */
+@media (max-width: 620px) {
+  :root {
+    --ui-nav-item: 12px;
+    --ui-breadcrumb: 10px;
+    --ui-area-title: 15px;
+    --ui-area-subtitle: 9px;
+    --ui-category-title: 12px;
+    --ui-category-meta: 9px;
+    --ui-category-summary: 9px;
+    --ui-task-name: 12px;
+    --ui-task-date: 9px;
+    --ui-quick-input: 11px;
+    --ui-quick-date: 9px;
+    --ui-accounting-task-name: 12px;
+    --ui-accounting-subtitle: 9px;
+    --ui-chart-heading: 13px;
+    --ui-chart-value: 9px;
+    --ui-chart-label: 8px;
+    --ui-risk-label: 9px;
+    --ui-risk-detail: 8px;
+    --ui-form-label: 11px;
+    --ui-form-input: 14px;
+  }
+
+  .operational-panel .dashboard-task-row { min-height: 29px; }
+  .accounting-panel .accounting-task-row { min-height: 49px; }
+}
+
+@media (max-width: 420px) {
+  :root {
+    --ui-task-name: 11.5px;
+    --ui-task-date: 8.5px;
+    --ui-accounting-task-name: 11.5px;
+    --ui-accounting-subtitle: 8.5px;
+    --ui-category-title: 11.5px;
+  }
+}
