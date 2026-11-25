@@ -700,8 +700,11 @@ function renderCategoryBarChart() {
 
     const label = document.createElement("span");
     label.className = "category-count-label";
+    // El título conserva el nombre completo; el CSS lo trunca visualmente
+    // cuando hay muchas categorías o nombres largos.
     label.textContent = item.category.name;
     label.title = item.category.name;
+    label.setAttribute("aria-label", item.category.name);
 
     column.append(value, track, label);
     fragment.appendChild(column);
@@ -1473,26 +1476,8 @@ async function fetchCloudRows() {
     .from("categories").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
   if (categoriesError) throw categoriesError;
 
-  // El trigger SQL debería crear las diez categorías. Este respaldo cubre usuarios
-  // creados antes de instalar el trigger o una ejecución parcial del esquema.
-  const existingNames = new Set((categories || []).map(row => row.name.toLocaleLowerCase("es-CL")));
-  const missingDefaults = DEFAULT_CATEGORIES.filter(category => !existingNames.has(category.name.toLocaleLowerCase("es-CL")));
-  if (missingDefaults.length) {
-    const rows = missingDefaults.map((category, index) => ({
-      user_id: currentUser.id,
-      name: category.name,
-      area: category.groupId,
-      deadline_days: category.daysLimit,
-      sort_order: (DEFAULT_CATEGORIES.indexOf(category) + 1) * 10,
-      color: category.color,
-      bg: category.bg
-    }));
-    const { error: seedError } = await supabaseClient.from("categories").insert(rows);
-    if (seedError) throw seedError;
-    const refreshed = await supabaseClient.from("categories").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
-    if (refreshed.error) throw refreshed.error;
-    categories = refreshed.data || [];
-  }
+  // V4.5: las categorías son totalmente dinámicas. No se insertan valores
+  // predeterminados desde el cliente; cada usuario crea las suyas.
 
   const { data: tasks, error: tasksError } = await supabaseClient
     .from("tasks").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
@@ -1781,29 +1766,10 @@ async function initializeCloudApp() {
   setCloudStatus("Conectando con Supabase…", "saving");
 
   let remoteRows = await fetchCloudRows();
-  const migrationKey = `${STORAGE_KEY}:cloud-migration:${currentUser.id}`;
-  const migrationAlreadyHandled = Boolean(localStorage.getItem(migrationKey));
-  const legacyCount = localTaskCount(legacyStateForMigration);
-  const hasLocalData = legacyCount > 0 || hasMeaningfulLocalConfiguration(legacyStateForMigration);
-
-  // Solo ofrece migrar cuando la cuenta remota está vacía, para no duplicar registros.
-  if (!migrationAlreadyHandled && remoteRows.tasks.length === 0 && hasLocalData) {
-    const accepted = window.confirm(
-      `Encontré datos locales de una versión anterior: ${legacyCount} tareas entre activas y archivadas.\n\n¿Quieres importarlas a la cuenta ${currentUser.email}?\n\nSe conservará el respaldo original en este navegador y se crearán copias en Supabase.`
-    );
-    if (accepted) {
-      showAppGate("Importando tus tareas anteriores a Supabase…");
-      const importedCount = await importLegacyStateToCloud(legacyStateForMigration, remoteRows.categories);
-      localStorage.setItem(migrationKey, `imported:${new Date().toISOString()}`);
-      setCloudStatus(`${importedCount} tareas migradas`, "ok");
-      remoteRows = await fetchCloudRows();
-    } else {
-      localStorage.setItem(migrationKey, `skipped:${new Date().toISOString()}`);
-    }
-  } else if (!migrationAlreadyHandled && remoteRows.tasks.length > 0) {
-    // La nube ya tiene datos: no se fusiona automáticamente una copia local distinta.
-    localStorage.setItem(migrationKey, `cloud-already-had-data:${new Date().toISOString()}`);
-  }
+  // V4.5: la información de prueba se limpia en Supabase y se inicia desde cero.
+  // No se reimporta la antigua caché local, para evitar que reaparezcan registros
+  // de prueba después de ejecutar la limpieza administrativa de la base de datos.
+  localStorage.setItem(`${STORAGE_KEY}:cloud-migration:${currentUser.id}`, `clean-start-v4.5:${new Date().toISOString()}`);
 
   state = mapCloudRowsToState(remoteRows, currentUser.id);
   lastSyncedSnapshot = cloneAppState(state);

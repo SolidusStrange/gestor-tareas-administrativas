@@ -139,3 +139,25 @@ Ejecuta una vez el archivo `03_migration_dynamic_categories.sql` en Supabase SQL
 ### Publicar V4.4
 
 Reemplaza `index.html`, `styles.css`, `app.js` y `README.md` en el repositorio GitHub. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js`, `theme.js` y `.nojekyll`. Ejecuta la migración SQL antes de probar con cuentas nuevas.
+
+
+## V4.5 — Dos áreas fijas y subcategorías creadas por el usuario
+
+- Las únicas áreas fijas son Operacional y Contabilidad.
+- No se precargan categorías. Cada usuario crea las subcategorías que necesita, indicando nombre, área y plazo.
+- Se mantiene la validación de nombres repetidos dentro de la cuenta; la base incorpora además un índice único insensible a mayúsculas y espacios externos.
+- Contabilidad conserva su columna derecha de un tercio en escritorio.
+- El resumen superior aumenta tamaño de títulos, contadores, etiquetas y porcentajes.
+- El gráfico de categorías mantiene una fila de columnas con desplazamiento horizontal cuando hay muchas categorías; los nombres largos se truncan visualmente con puntos suspensivos y el nombre completo permanece disponible al pasar el cursor.
+- El nombre de las tareas contables deja de usar negrita más pesada que las tareas operacionales.
+- La aplicación ya no importa la antigua caché local de prueba al iniciar una cuenta vacía: Supabase queda como fuente de verdad para iniciar limpio.
+
+### Limpieza de datos de prueba en Supabase
+
+Ejecuta `04_reset_test_data_all_users.sql` desde Supabase SQL Editor. El script elimina todas las filas de `public.tasks` y `public.categories` de todos los usuarios, conserva las cuentas de `auth.users`, reafirma que el trigger de alta no cree categorías predeterminadas y agrega una restricción de unicidad por usuario sobre el nombre normalizado.
+
+**La limpieza es irreversible.** Descarga un respaldo antes si existe cualquier dato que quieras conservar. No elimina usuarios ni contraseñas.
+
+### Publicar V4.5
+
+Reemplaza en la raíz del repositorio `index.html`, `styles.css`, `app.js` y `README.md`. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js`, `theme.js` y `.nojekyll` de la versión conectada. Ejecuta el SQL de limpieza una sola vez en Supabase; no hace falta modificar las políticas RLS.

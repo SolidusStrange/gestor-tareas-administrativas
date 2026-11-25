@@ -2310,3 +2310,103 @@ body.app-auth-pending .app-shell { visibility: hidden; }
   .operational-panel .category-empty-note,
   .accounting-panel .accounting-empty-note { font-size: 11.5px; }
 }
+
+
+/* ========================================================================== */
+/* V4.5 — LEGIBILIDAD DE RESUMEN Y GRÁFICO DE CATEGORÍAS ADAPTABLE.          */
+/* ========================================================================== */
+:root {
+  --ui-chart-heading: 16px;
+  --ui-chart-kicker: 9px;
+  --ui-chart-value: 12px;
+  --ui-chart-label: 11px;
+  --ui-risk-label: 12px;
+  --ui-risk-detail: 10.5px;
+}
+
+/* El texto de las tareas de Contabilidad usa el mismo peso que Operacional. */
+.operational-panel .dashboard-task-name,
+.accounting-panel .accounting-task-name {
+  font-weight: 500;
+}
+
+/* Resumen superior: aumenta los textos que antes quedaban demasiado pequeños. */
+.dashboard-top-grid .overview-title-wrap h2,
+.dashboard-top-grid .widget-heading h2 { font-size: 16px; }
+.dashboard-top-grid .overview-title-wrap .section-kicker,
+.dashboard-top-grid .widget-heading .section-kicker { font-size: 9px; }
+.dashboard-top-grid .overview-total span { font-size: 10.5px; }
+.dashboard-top-grid .group-progress-name,
+.dashboard-top-grid .group-progress-copy strong { font-size: 11px; }
+.dashboard-top-grid .group-progress-detail { font-size: 10px; }
+.status-donut-item .status-donut-hole strong { font-size: 19px; }
+.status-donut-item .status-donut-hole span { font-size: 8.5px; }
+.status-donut-item .status-donut-copy > strong { font-size: 12px; }
+.status-donut-item .status-donut-copy > span { font-size: 10.5px; }
+.category-count-value { font-size: 12px; }
+
+/*
+ * Gráfico de categorías en una única fila horizontal. Cada columna conserva
+ * un ancho mínimo; si hay muchas, el gráfico permite desplazamiento propio.
+ * El nombre se trunca con puntos suspensivos y el nombre íntegro queda en title.
+ */
+.category-count-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.category-count-column {
+  flex: 1 0 48px;
+  min-width: 48px;
+  max-width: 72px;
+  grid-template-rows: 18px minmax(0, 1fr) 25px;
+}
+.category-count-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 25px;
+  padding: 0 2px;
+  overflow: hidden;
+  color: var(--muted, #66747d);
+  font-size: 10.5px;
+  line-height: 1.25;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.category-chart-empty {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--muted, #87939b);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  :root {
+    --ui-chart-heading: 14px;
+    --ui-chart-kicker: 8px;
+    --ui-chart-value: 10px;
+    --ui-chart-label: 9px;
+    --ui-risk-label: 10px;
+    --ui-risk-detail: 9px;
+  }
+  .dashboard-top-grid .overview-title-wrap h2,
+  .dashboard-top-grid .widget-heading h2 { font-size: 14px; }
+  .dashboard-top-grid .group-progress-name,
+  .dashboard-top-grid .group-progress-copy strong { font-size: 10px; }
+  .dashboard-top-grid .group-progress-detail { font-size: 9px; }
+  .status-donut-item .status-donut-copy > strong { font-size: 10px; }
+  .status-donut-item .status-donut-copy > span { font-size: 9px; }
+  .category-count-column { flex-basis: 44px; min-width: 44px; }
+  .category-count-label { font-size: 9px; }
+}
