@@ -2029,3 +2029,252 @@ body.app-auth-pending .app-shell { visibility: hidden; }
   .dashboard-quick-category, .dashboard-quick-name, .dashboard-quick-date { height: 31px; font-size: 11px; }
   .dashboard-quick-submit { width: 30px; height: 30px; }
 }
+
+
+/* ========================================================================== */
+/* V4.3 — MODO NOCTURNO Y CONTROL DE APARIENCIA.                              */
+/* ========================================================================== */
+
+/* Tokens globales del modo nocturno. La preferencia se aplica en <html>. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #151b20;
+  --surface: #20282f;
+  --surface-muted: #252f37;
+  --ink: #e4ebef;
+  --muted: #a0adb6;
+  --line: #35414a;
+  --sidebar: #12191e;
+  --sidebar-muted: #a6b2ba;
+  --chart-track: #343e47;
+  --shadow: 0 3px 12px rgba(0, 0, 0, .18);
+}
+
+/* Control de tema: siempre visible en la cabecera y accesible con teclado. */
+.theme-toggle {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid #e0e6e9;
+  border-radius: 7px;
+  background: #fff;
+  color: #586771;
+  font-family: "DM Sans", Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: color .18s, background .18s, border-color .18s, transform .18s;
+}
+.theme-toggle:hover { transform: translateY(-1px); background: #f7f9fa; border-color: #cbd6db; }
+.theme-toggle:focus-visible { outline: 3px solid rgba(71, 158, 207, .28); outline-offset: 2px; }
+.theme-icon { width: 15px; height: 15px; flex: 0 0 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle { border-color: #3b4852; background: #27323a; color: #d5e0e5; }
+:root[data-theme="dark"] .theme-toggle:hover { border-color: #566671; background: #303c45; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
+:root[data-theme="dark"] .theme-icon-sun { display: block; color: #e8c879; }
+
+/* Fondo, cabecera y tarjetas principales. */
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .main-content { background: var(--page); color: var(--ink); }
+:root[data-theme="dark"] .topbar {
+  border-bottom-color: var(--line);
+  background: rgba(27, 35, 41, .94);
+}
+:root[data-theme="dark"] .breadcrumb,
+:root[data-theme="dark"] .today-label,
+:root[data-theme="dark"] .user-email-label { color: #9aa9b2; }
+:root[data-theme="dark"] .breadcrumb strong,
+:root[data-theme="dark"] .today-display strong { color: #e0e8ec; }
+:root[data-theme="dark"] .overview-card,
+:root[data-theme="dark"] .analytics-card,
+:root[data-theme="dark"] .category-card,
+:root[data-theme="dark"] .accounting-panel,
+:root[data-theme="dark"] .dashboard-quick-add-card,
+:root[data-theme="dark"] .archive-summary-card,
+:root[data-theme="dark"] .archive-category,
+:root[data-theme="dark"] .task-summary-card,
+:root[data-theme="dark"] .task-manager-card,
+:root[data-theme="dark"] .app-dialog,
+:root[data-theme="dark"] .app-gate-card {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+:root[data-theme="dark"] .overview-title-wrap h2,
+:root[data-theme="dark"] .widget-heading h2,
+:root[data-theme="dark"] .page-heading h1,
+:root[data-theme="dark"] .group-heading-main h2,
+:root[data-theme="dark"] .dashboard-quick-add-title h2,
+:root[data-theme="dark"] .category-title,
+:root[data-theme="dark"] .accounting-task-name,
+:root[data-theme="dark"] .archive-summary-card h2,
+:root[data-theme="dark"] .archive-category-header h2,
+:root[data-theme="dark"] .dialog-heading h2,
+:root[data-theme="dark"] .app-gate-card h2,
+:root[data-theme="dark"] .tasks-page-heading h1,
+:root[data-theme="dark"] .task-summary-card strong {
+  color: #e2eaf0;
+}
+:root[data-theme="dark"] .section-kicker,
+:root[data-theme="dark"] .eyebrow { color: #9baab4; }
+:root[data-theme="dark"] .page-subtitle,
+:root[data-theme="dark"] .group-heading-main p,
+:root[data-theme="dark"] .category-meta,
+:root[data-theme="dark"] .category-total-count,
+:root[data-theme="dark"] .category-empty-note,
+:root[data-theme="dark"] .accounting-task-subtitle,
+:root[data-theme="dark"] .accounting-empty-note,
+:root[data-theme="dark"] .archive-category-group,
+:root[data-theme="dark"] .archive-category-count,
+:root[data-theme="dark"] .archive-summary-card p,
+:root[data-theme="dark"] .footer-note,
+:root[data-theme="dark"] .task-manager-footnote,
+:root[data-theme="dark"] .app-gate-card p { color: #9aa9b2; }
+
+/* Controles de progreso y gráficos. */
+:root[data-theme="dark"] .overview-progress-track,
+:root[data-theme="dark"] .mini-progress-track,
+:root[data-theme="dark"] .category-progress-track,
+:root[data-theme="dark"] .status-share-track,
+:root[data-theme="dark"] .category-count-bar-track {
+  background: var(--chart-track);
+}
+:root[data-theme="dark"] .group-progress-grid,
+:root[data-theme="dark"] .risk-summary-item + .risk-summary-item,
+:root[data-theme="dark"] .category-card-footer,
+:root[data-theme="dark"] .accounting-task-row,
+:root[data-theme="dark"] .task-item,
+:root[data-theme="dark"] .archive-category-header,
+:root[data-theme="dark"] .archived-item,
+:root[data-theme="dark"] .archive-category-header,
+:root[data-theme="dark"] .task-manager-toolbar,
+:root[data-theme="dark"] .task-table-heading,
+:root[data-theme="dark"] .task-manager-footnote,
+:root[data-theme="dark"] .add-task-form {
+  border-color: #35424b;
+}
+:root[data-theme="dark"] .status-donut-hole,
+:root[data-theme="dark"] .donut-hole {
+  background: #20282f;
+  box-shadow: 0 1px 5px rgba(0,0,0,.25);
+}
+:root[data-theme="dark"] .status-donut-hole strong,
+:root[data-theme="dark"] .donut-hole strong { color: #e3ebef; }
+:root[data-theme="dark"] .status-donut-hole span,
+:root[data-theme="dark"] .donut-hole span { color: #9ba9b2; }
+:root[data-theme="dark"] .category-count-value,
+:root[data-theme="dark"] .category-count-label,
+:root[data-theme="dark"] .group-progress-name,
+:root[data-theme="dark"] .group-progress-copy strong,
+:root[data-theme="dark"] .category-summary-line .category-pending-count,
+:root[data-theme="dark"] .category-percent,
+:root[data-theme="dark"] .risk-summary-label,
+:root[data-theme="dark"] .risk-summary-detail > strong,
+:root[data-theme="dark"] .status-donut-copy > span { color: #bdc9d0; }
+:root[data-theme="dark"] .risk-summary-detail,
+:root[data-theme="dark"] .group-progress-detail,
+:root[data-theme="dark"] .overview-total span { color: #94a3ad; }
+
+/* Tareas, checks, fechas y acciones. */
+:root[data-theme="dark"] .task-name,
+:root[data-theme="dark"] .operational-panel .dashboard-task-name,
+:root[data-theme="dark"] .accounting-task-name { color: #d4dee4; }
+:root[data-theme="dark"] .task-date-label,
+:root[data-theme="dark"] .dashboard-task-date,
+:root[data-theme="dark"] .accounting-task-trailing .dashboard-task-date,
+:root[data-theme="dark"] .archived-date,
+:root[data-theme="dark"] .archived-meta,
+:root[data-theme="dark"] .manager-date-cell { color: #a4b1ba; }
+:root[data-theme="dark"] .task-item.completed .task-name,
+:root[data-theme="dark"] .category-card .dashboard-task-row.completed .task-name,
+:root[data-theme="dark"] .operational-panel .dashboard-task-row.completed .dashboard-task-name,
+:root[data-theme="dark"] .accounting-task-row.completed .accounting-task-name,
+:root[data-theme="dark"] .task-manager-row.is-completed .manager-task-title { color: #87959e; }
+:root[data-theme="dark"] .custom-checkbox { border-color: #697984; background: #252f37; }
+:root[data-theme="dark"] .task-action { color: #a3b0b8; }
+:root[data-theme="dark"] .task-action:hover,
+:root[data-theme="dark"] .category-drag-handle:hover,
+:root[data-theme="dark"] .collapse-group-button:hover { background: #303c45; color: #e3ebef; }
+:root[data-theme="dark"] .category-drag-handle,
+:root[data-theme="dark"] .task-drag-handle,
+:root[data-theme="dark"] .task-drag-handle,
+:root[data-theme="dark"] .dashboard-task-drag-handle,
+:root[data-theme="dark"] .accounting-drag-handle { color: #7f8e98; }
+:root[data-theme="dark"] .task-item.drop-target,
+:root[data-theme="dark"] .accounting-task-row.drop-target,
+:root[data-theme="dark"] .task-manager-row.drop-target { background: #243b37; box-shadow: inset 0 1px #4a8275, inset 0 -1px #4a8275; }
+:root[data-theme="dark"] .category-card.drop-target,
+:root[data-theme="dark"] .operational-panel .category-card.drop-target { border-color: #5c9b8d; }
+
+/* Formularios rápidos, filtros, selects y campos de edición. */
+:root[data-theme="dark"] .dashboard-quick-category,
+:root[data-theme="dark"] .dashboard-quick-name,
+:root[data-theme="dark"] .dashboard-quick-date,
+:root[data-theme="dark"] .inline-task-name,
+:root[data-theme="dark"] .inline-task-date,
+:root[data-theme="dark"] .new-task-input,
+:root[data-theme="dark"] .new-task-date-wrap,
+:root[data-theme="dark"] .new-task-date,
+:root[data-theme="dark"] .form-field input,
+:root[data-theme="dark"] .form-field select,
+:root[data-theme="dark"] .task-search,
+:root[data-theme="dark"] .task-filter,
+:root[data-theme="dark"] .task-search input {
+  border-color: #3b4852;
+  background: #182127;
+  color: #dce5ea;
+}
+:root[data-theme="dark"] .dashboard-quick-category,
+:root[data-theme="dark"] .dashboard-quick-date,
+:root[data-theme="dark"] .new-task-date-wrap { background: #202a31; }
+:root[data-theme="dark"] .dashboard-quick-name::placeholder,
+:root[data-theme="dark"] .inline-task-name::placeholder,
+:root[data-theme="dark"] .new-task-input::placeholder,
+:root[data-theme="dark"] .task-search input::placeholder,
+:root[data-theme="dark"] .form-field input::placeholder { color: #80909a; }
+:root[data-theme="dark"] select option { background: #20282f; color: #e0e8ed; }
+:root[data-theme="dark"] .dashboard-quick-category:focus,
+:root[data-theme="dark"] .dashboard-quick-name:focus,
+:root[data-theme="dark"] .dashboard-quick-date:focus,
+:root[data-theme="dark"] .form-field input:focus,
+:root[data-theme="dark"] .form-field select:focus { border-color: #6b9f92; }
+
+/* Botones secundarios, colapsar, archivados y ventanas modales. */
+:root[data-theme="dark"] .button-quiet,
+:root[data-theme="dark"] .collapse-group-button,
+:root[data-theme="dark"] .dialog-close,
+:root[data-theme="dark"] .restore-button,
+:root[data-theme="dark"] .add-category-inline {
+  border-color: #3a4852;
+  background: #26313a;
+  color: #c2ced5;
+}
+:root[data-theme="dark"] .button-quiet:hover,
+:root[data-theme="dark"] .restore-button:hover,
+:root[data-theme="dark"] .add-category-inline:hover { background: #303c45; border-color: #52616b; }
+:root[data-theme="dark"] .dialog-hint,
+:root[data-theme="dark"] .form-field { color: #a9b6be; }
+:root[data-theme="dark"] .app-dialog::backdrop { background: rgba(0,0,0,.66); }
+:root[data-theme="dark"] .archive-category-header,
+:root[data-theme="dark"] .task-table-heading { background: #252f37; color: #a9b6be; }
+:root[data-theme="dark"] .archived-name,
+:root[data-theme="dark"] .manager-task-title,
+:root[data-theme="dark"] .manager-category-name,
+:root[data-theme="dark"] .manager-status-cell { color: #d1dce2; }
+:root[data-theme="dark"] .manager-area-pill.area-operational { background: #263c37; color: #9acbbd; }
+:root[data-theme="dark"] .manager-area-pill.area-accounting { background: #362d41; color: #c3a9df; }
+:root[data-theme="dark"] .empty-state { border-color: #46535c; background: rgba(32,40,47,.6); color: #9aa9b2; }
+:root[data-theme="dark"] .app-gate { background: #151b20; }
+:root[data-theme="dark"] .app-gate-spinner { border-color: #34433f; border-top-color: #67a999; }
+
+/* En pantallas pequeñas el selector conserva solo el icono para ahorrar espacio. */
+@media (max-width: 620px) {
+  .theme-toggle { width: 34px; min-width: 34px; height: 34px; padding: 0; gap: 0; }
+  .theme-toggle-label { display: none; }
+  .topbar-actions { gap: 8px; }
+}

@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#24282b" />
+  <meta name="theme-color" content="#f3f5f7" />
+  <!-- Restaura la apariencia guardada antes de cargar los estilos para evitar parpadeos. -->
+  <script>
+    (() => {
+      try {
+        if (localStorage.getItem("gestor-admin-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (_) { /* El modo claro sigue disponible si el navegador bloquea el almacenamiento. */ }
+    })();
+  </script>
   <meta name="description" content="Gestión administrativa de tareas operacionales y contables." />
   <title>Gestión Administrativa | Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +54,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="storage-status" id="cloud-status"><span class="status-dot"></span><span id="cloud-status-text">Conectando con Supabase…</span></div>
-        <div class="sidebar-version">CONTROL DE TAREAS · V4.2</div>
+        <div class="sidebar-version">CONTROL DE TAREAS · V4.3</div>
         <button class="logout-button" id="logout-button" type="button">Cerrar sesión</button>
       </div>
     </aside>
@@ -54,6 +64,11 @@
       <header class="topbar">
         <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong id="breadcrumb-current">Dashboard</strong></div>
         <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activar modo nocturno" aria-pressed="false" title="Cambiar a modo nocturno">
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8 8.7 8.7 0 1 0 20.2 15.1Z"/></svg>
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+            <span class="theme-toggle-label">Modo nocturno</span>
+          </button>
           <div class="today-display"><span id="user-email-label" class="user-email-label">Usuario</span><span class="today-label">HOY</span><strong id="current-date">--/--/----</strong></div>
         </div>
       </header>
@@ -94,7 +109,7 @@
               <!-- Cada nivel de riesgo se representa como un gráfico de torta independiente. -->
               <div class="risk-donut-grid">
                 <div class="status-donut-item yellow-status-card">
-                  <div class="status-donut" id="yellow-donut" role="img" aria-label="0 tareas en observación" style="background: conic-gradient(#e5b13d 0% 0%, #edf0f2 0% 100%);">
+                  <div class="status-donut" id="yellow-donut" role="img" aria-label="0 tareas en observación" style="background: conic-gradient(#e5b13d 0% 0%, var(--chart-track, #edf0f2) 0% 100%);">
                     <div class="status-donut-hole"><strong id="yellow-count">0</strong><span>tareas</span></div>
                   </div>
                   <div class="status-donut-copy">
@@ -103,7 +118,7 @@
                   </div>
                 </div>
                 <div class="status-donut-item red-status-card">
-                  <div class="status-donut" id="red-donut" role="img" aria-label="0 tareas críticas" style="background: conic-gradient(#df555d 0% 0%, #edf0f2 0% 100%);">
+                  <div class="status-donut" id="red-donut" role="img" aria-label="0 tareas críticas" style="background: conic-gradient(#df555d 0% 0%, var(--chart-track, #edf0f2) 0% 100%);">
                     <div class="status-donut-hole"><strong id="red-count">0</strong><span>tareas</span></div>
                   </div>
                   <div class="status-donut-copy">
@@ -292,6 +307,7 @@
 
   <!-- JavaScript: carga/migración de datos, renderizado, formularios rápidos y acciones. -->
   <!-- supabase-js se utiliza como biblioteca UMD; la clave configurada es publicable. -->
+  <script src="theme.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="app.js"></script>

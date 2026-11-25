@@ -737,7 +737,7 @@ function renderRiskMetric(level, count, pendingTotal) {
 
   countNode.textContent = String(count);
   shareNode.textContent = `${percent}%`;
-  donut.style.background = `conic-gradient(${color} 0% ${percent}%, #edf0f2 ${percent}% 100%)`;
+  donut.style.background = `conic-gradient(${color} 0% ${percent}%, var(--chart-track, #edf0f2) ${percent}% 100%)`;
   const label = level === "red" ? "tareas críticas" : "tareas en observación";
   donut.setAttribute("aria-label", `${count} ${label}, ${percent}% de las tareas pendientes`);
 }

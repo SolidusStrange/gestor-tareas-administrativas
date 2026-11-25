@@ -1,4 +1,4 @@
-# Gestor de Tareas Administrativas — V4.2
+# Gestor de Tareas Administrativas — V4.3
 
 Aplicación estática HTML/CSS/JavaScript conectada a Supabase Auth y PostgreSQL.
 
@@ -90,3 +90,16 @@ Reemplaza en la raíz del repositorio `styles.css`, `index.html` y `README.md` p
 ### Actualización de GitHub Pages
 
 Reemplaza `index.html`, `styles.css`, `app.js` y `README.md` en la raíz del repositorio por los archivos de esta versión. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js` y `.nojekyll` de la versión conectada actual. No ejecutes nuevamente los scripts SQL: esta actualización no cambia la base de datos.
+
+
+## V4.3 — modo claro y modo nocturno
+
+- Se agregó un control de apariencia en la esquina superior derecha del Dashboard y del inicio de sesión.
+- La preferencia se guarda en `localStorage` con la clave `gestor-admin-theme` y se conserva al cambiar entre páginas o volver a entrar.
+- El modo nocturno ajusta fondo, superficies, bordes, textos, gráficos, formularios, archivados y ventanas modales.
+- La pantalla de inicio de sesión también respeta el mismo modo visual.
+- La preferencia de tema es independiente de los datos de tareas y de Supabase.
+
+### Actualización de GitHub Pages
+
+Reemplaza `index.html`, `login.html`, `styles.css`, `login.css` y agrega el nuevo `theme.js` en la raíz del repositorio. Conserva `app.js`, `auth.js`, `supabase-config.js` y `.nojekyll`. No ejecutes SQL: esta versión no modifica PostgreSQL, RLS ni la autenticación.

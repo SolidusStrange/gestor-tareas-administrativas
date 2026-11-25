@@ -73,3 +73,27 @@ button { cursor: pointer; }
 .auth-feedback.error { color: #bf4c53; }
 .auth-feedback.success { color: #398675; }
 .auth-submit:disabled { opacity: .65; cursor: wait; transform: none; }
+
+
+/* V4.3 — Modo nocturno compartido con el Dashboard. */
+.auth-form-panel { position: relative; }
+.auth-theme-toggle { position: absolute; top: 15px; right: 18px; }
+:root[data-theme="dark"] body.auth-body { background: #151b20; color: #e4ebef; }
+:root[data-theme="dark"] .auth-shell { border-color: #35414a; background: #20282f; box-shadow: 0 18px 55px rgba(0,0,0,.28); }
+:root[data-theme="dark"] .auth-form-panel { background: #20282f; }
+:root[data-theme="dark"] .auth-mobile-brand { color: #e2eaf0; }
+:root[data-theme="dark"] .auth-heading h2 { color: #e5edf1; }
+:root[data-theme="dark"] .auth-heading p,
+:root[data-theme="dark"] .auth-feedback,
+:root[data-theme="dark"] .auth-security-note { color: #a1afb8; }
+:root[data-theme="dark"] .auth-security-note { border-top-color: #35414a; }
+:root[data-theme="dark"] .auth-field { color: #bcc8cf; }
+:root[data-theme="dark"] .auth-field input { border-color: #3b4852; background: #182127; color: #e2eaf0; }
+:root[data-theme="dark"] .auth-field input::placeholder { color: #80909a; }
+:root[data-theme="dark"] .auth-field input:focus { border-color: #6b9f92; }
+:root[data-theme="dark"] .auth-lock { background: #263c37; color: #9acbbd; }
+:root[data-theme="dark"] .auth-theme-toggle { border-color: #3b4852; background: #27323a; color: #d5e0e5; }
+:root[data-theme="dark"] .auth-theme-toggle:hover { border-color: #566671; background: #303c45; }
+@media (max-width: 620px) {
+  .auth-theme-toggle { width: 34px; min-width: 34px; height: 34px; padding: 0; }
+}
