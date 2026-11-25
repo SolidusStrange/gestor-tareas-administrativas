@@ -161,3 +161,47 @@ Ejecuta `04_reset_test_data_all_users.sql` desde Supabase SQL Editor. El script 
 ### Publicar V4.5
 
 Reemplaza en la raíz del repositorio `index.html`, `styles.css`, `app.js` y `README.md`. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js`, `theme.js` y `.nojekyll` de la versión conectada. Ejecuta el SQL de limpieza una sola vez en Supabase; no hace falta modificar las políticas RLS.
+
+
+## V4.6 — Calendario mensual tipo heatmap
+
+- Se reemplaza el gráfico de barras por un calendario mensual basado en las fechas de referencia de las tareas activas.
+- Cada día adopta el nivel de riesgo más alto entre sus tareas: verde (en plazo o completada), amarillo (primer tramo de seguimiento), naranja (desde la mitad del plazo) y rojo (plazo alcanzado o superado).
+- Los días sin tareas se muestran en gris neutro. Las tareas archivadas se excluyen del calendario.
+- Si hay varias tareas en un día, se muestra el contador y el color representa el riesgo más alto. El detalle de nombres, categorías y estados se consulta al pasar el cursor.
+- El calendario abre en el mes actual y permite navegar a meses anteriores; no permite navegar a meses futuros.
+- El calendario no requiere cambios de PostgreSQL, Supabase Auth ni políticas RLS.
+
+### Interpretación de colores
+
+- Verde: fecha de referencia de hoy o futura, o tarea completada.
+- Amarillo: ya transcurrió tiempo, pero aún no se alcanza la mitad del plazo de la categoría.
+- Naranja: se alcanzó al menos la mitad del plazo, pero todavía no se alcanza el límite.
+- Rojo: los días transcurridos son iguales o superiores al plazo de la categoría.
+- Gris: no hay tareas activas con esa fecha.
+
+### Actualizar GitHub Pages
+
+Reemplaza `index.html`, `styles.css`, `app.js` y `README.md`. Conserva los archivos de autenticación, configuración de Supabase y `theme.js`. No ejecutes SQL: esta versión no cambia la base de datos.
+
+
+## V4.6 — Calendario mensual tipo heatmap
+
+- Se reemplaza el gráfico de barras por un calendario mensual basado en las fechas de referencia de las tareas activas.
+- Cada día adopta el nivel de riesgo más alto entre sus tareas: verde (en plazo o completada), amarillo (primer tramo de seguimiento), naranja (desde la mitad del plazo) y rojo (plazo alcanzado o superado).
+- Los días sin tareas se muestran en gris neutro. Las tareas archivadas se excluyen del calendario.
+- Si hay varias tareas en un día, se muestra el contador y el color representa el riesgo más alto. El detalle de nombres, categorías y estados se consulta al pasar el cursor.
+- El calendario abre en el mes actual y permite navegar a meses anteriores; no permite navegar a meses futuros.
+- El calendario no requiere cambios de PostgreSQL, Supabase Auth ni políticas RLS.
+
+### Interpretación de colores
+
+- Verde: fecha de referencia de hoy o futura, o tarea completada.
+- Amarillo: ya transcurrió tiempo, pero aún no se alcanza la mitad del plazo de la categoría.
+- Naranja: se alcanzó al menos la mitad del plazo, pero todavía no se alcanza el límite.
+- Rojo: los días transcurridos son iguales o superiores al plazo de la categoría.
+- Gris: no hay tareas activas con esa fecha.
+
+### Actualizar GitHub Pages
+
+Reemplaza `index.html`, `styles.css`, `app.js` y `README.md`. Conserva los archivos de autenticación, configuración de Supabase y `theme.js`. No ejecutes SQL: esta versión no cambia la base de datos.

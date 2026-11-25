@@ -54,7 +54,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="storage-status" id="cloud-status"><span class="status-dot"></span><span id="cloud-status-text">Conectando con Supabase…</span></div>
-        <div class="sidebar-version">CONTROL DE TAREAS · V4.5</div>
+        <div class="sidebar-version">CONTROL DE TAREAS · V4.6</div>
         <button class="logout-button" id="logout-button" type="button">Cerrar sesión</button>
       </div>
     </aside>
@@ -129,12 +129,29 @@
               </div>
             </section>
 
-            <section class="analytics-card dashboard-top-card category-count-card" aria-label="Cantidad de tareas por categoría">
-              <div class="widget-heading">
-                <div><span class="section-kicker">DISTRIBUCIÓN</span><h2>Tareas por categoría</h2></div>
-                <span class="category-count-total" id="category-count-total">0 tareas</span>
+            <section class="analytics-card dashboard-top-card category-count-card monthly-heatmap-card" aria-label="Calendario mensual de riesgo">
+              <div class="widget-heading heatmap-heading">
+                <div><span class="section-kicker">CALENDARIO DE RIESGO</span><h2>Mapa mensual</h2></div>
+                <div class="heatmap-month-controls" aria-label="Cambiar mes del calendario">
+                  <button class="heatmap-month-button" id="heatmap-prev-month" type="button" aria-label="Mes anterior" title="Mes anterior">‹</button>
+                  <strong id="heatmap-month-label">Mes actual</strong>
+                  <button class="heatmap-month-button" id="heatmap-next-month" type="button" aria-label="Mes siguiente" title="Mes siguiente">›</button>
+                </div>
               </div>
-              <div class="category-count-chart" id="category-count-chart" role="list" aria-label="Cantidad de tareas activas por categoría"></div>
+              <div class="heatmap-weekdays" aria-hidden="true">
+                <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+              </div>
+              <div class="monthly-heatmap-grid" id="monthly-heatmap-grid" role="grid" aria-label="Calendario mensual de tareas"></div>
+              <div class="heatmap-footer">
+                <span class="heatmap-month-total" id="heatmap-month-total">0 tareas</span>
+                <div class="heatmap-legend" aria-label="Leyenda de riesgo">
+                  <span><i class="heatmap-swatch heatmap-level-ok"></i>En plazo</span>
+                  <span><i class="heatmap-swatch heatmap-level-yellow"></i>Seguimiento</span>
+                  <span><i class="heatmap-swatch heatmap-level-orange"></i>Próximo al límite</span>
+                  <span><i class="heatmap-swatch heatmap-level-red"></i>Crítico</span>
+                  <span><i class="heatmap-swatch heatmap-level-empty"></i>Sin tareas</span>
+                </div>
+              </div>
             </section>
           </div>
 

@@ -274,6 +274,8 @@ let currentView = "dashboard";
 let editingTask = null;
 let dragPayload = null;
 let lastRenderedDate = dateKey();
+// El heatmap abre siempre en el mes actual; la navegación no altera los datos.
+let heatmapMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 // ============================================================================
 // 4. CÁLCULOS DE PROGRESO, PLAZOS Y URGENCIA
@@ -636,89 +638,122 @@ function renderDashboard() {
   refreshDashboardQuickCategoryOptions();
 
   updateOverview();
-  renderCategoryBarChart();
+  renderMonthlyHeatmap();
 }
 
 // ============================================================================
 // 6. ANALÍTICA DEL DASHBOARD
-//    Agrupa los dos niveles de riesgo en una tarjeta y muestra una barra por
-//    categoría con el total de tareas activas (pendientes + completadas).
+//    Sustituye el gráfico por categoría por un calendario mensual tipo heatmap.
+//    Cada día refleja el riesgo más alto entre sus tareas activas.
 // ============================================================================
-function renderCategoryBarChart() {
-  // Cuenta tareas activas (pendientes y completadas) por categoría.
-  const rows = state.categories.map((category, originalIndex) => {
-    const stats = getCategoryTaskStats(category);
-    return {
-      category,
-      originalIndex,
-      total: stats.tasks.length,
-      yellow: stats.yellow,
-      red: stats.red,
-      pending: stats.pending.length
-    };
-  });
+function getHeatmapLevel(task, category) {
+  // Las tareas completadas quedan verdes: ya no representan un riesgo pendiente.
+  if (task.completed) return "ok";
+  const elapsedDays = dayDifferenceFromToday(task.dueDate);
+  if (elapsedDays <= 0) return "ok";
 
-  // Los gráficos de torta representan cada nivel de riesgo como proporción
-  // de todas las tareas pendientes; las tareas completadas no participan.
-  const pendingTotal = rows.reduce((sum, item) => sum + item.pending, 0);
+  const deadline = Math.max(1, Number(category.daysLimit) || 1);
+  if (elapsedDays >= deadline) return "red";
+  // La segunda mitad del plazo pasa a naranja; antes permanece en amarillo.
+  return elapsedDays / deadline >= 0.5 ? "orange" : "yellow";
+}
+
+function changeHeatmapMonth(offset) {
+  heatmapMonth = new Date(heatmapMonth.getFullYear(), heatmapMonth.getMonth() + offset, 1);
+  renderMonthlyHeatmap();
+}
+
+function renderMonthlyHeatmap() {
+  // Mantiene los gráficos circulares de urgencia con sus reglas existentes.
+  const rows = state.categories.map(category => getCategoryTaskStats(category));
+  const pendingTotal = rows.reduce((sum, item) => sum + item.pending.length, 0);
   const yellowTotal = rows.reduce((sum, item) => sum + item.yellow, 0);
   const redTotal = rows.reduce((sum, item) => sum + item.red, 0);
   renderRiskMetric("yellow", yellowTotal, pendingTotal);
   renderRiskMetric("red", redTotal, pendingTotal);
 
-  const chart = document.getElementById("category-count-chart");
-  const totalNode = document.getElementById("category-count-total");
-  if (!chart || !totalNode) return;
+  const calendar = document.getElementById("monthly-heatmap-grid");
+  const monthLabel = document.getElementById("heatmap-month-label");
+  const monthTotal = document.getElementById("heatmap-month-total");
+  if (!calendar || !monthLabel || !monthTotal) return;
 
-  const activeTaskTotal = rows.reduce((sum, item) => sum + item.total, 0);
-  totalNode.textContent = `${activeTaskTotal} ${activeTaskTotal === 1 ? "tarea" : "tareas"}`;
-  const maximum = Math.max(1, ...rows.map(item => item.total));
-  const sortedRows = rows.sort((a, b) => b.total - a.total || a.originalIndex - b.originalIndex);
+  const year = heatmapMonth.getFullYear();
+  const month = heatmapMonth.getMonth();
+  monthLabel.textContent = new Intl.DateTimeFormat("es-CL", { month: "long", year: "numeric" }).format(heatmapMonth);
+  monthLabel.textContent = monthLabel.textContent.charAt(0).toUpperCase() + monthLabel.textContent.slice(1);
+
+  // Agrupa tareas activas por su fecha de referencia. Las archivadas no participan.
+  const tasksByDate = new Map();
+  for (const { task, category } of allActiveTasks()) {
+    if (!parseDateKey(task.dueDate)) continue;
+    const key = task.dueDate;
+    if (!tasksByDate.has(key)) tasksByDate.set(key, []);
+    tasksByDate.get(key).push({ task, category, level: getHeatmapLevel(task, category) });
+  }
+
+  const taskCountInMonth = [...tasksByDate.entries()]
+    .filter(([key]) => {
+      const date = parseDateKey(key);
+      return date && date.getFullYear() === year && date.getMonth() === month;
+    })
+    .reduce((sum, [, items]) => sum + items.length, 0);
+  monthTotal.textContent = `${taskCountInMonth} ${taskCountInMonth === 1 ? "tarea" : "tareas"}`;
+
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const totalCells = Math.ceil((mondayOffset + daysInMonth) / 7) * 7;
   const fragment = document.createDocumentFragment();
-  chart.replaceChildren();
+  const severity = { ok: 0, yellow: 1, orange: 2, red: 3 };
 
-  // V4.4: el gráfico usa nombres reales y dinámicos, no un catálogo fijo.
+  for (let index = 0; index < totalCells; index += 1) {
+    const day = index - mondayOffset + 1;
+    if (day < 1 || day > daysInMonth) {
+      const blank = document.createElement("span");
+      blank.className = "heatmap-day heatmap-day-blank";
+      blank.setAttribute("aria-hidden", "true");
+      fragment.appendChild(blank);
+      continue;
+    }
 
-  for (const item of sortedRows) {
-    const column = document.createElement("div");
-    column.className = "category-count-column";
-    column.setAttribute("role", "listitem");
-    column.title = `${item.category.name}: ${item.total} ${item.total === 1 ? "tarea" : "tareas"}`;
+    const date = new Date(year, month, day);
+    const key = dateKey(date);
+    const items = tasksByDate.get(key) || [];
+    const worst = items.reduce((current, item) => severity[item.level] > severity[current] ? item.level : current, "ok");
+    const cell = document.createElement("div");
+    cell.className = `heatmap-day heatmap-level-${items.length ? worst : "empty"}`;
+    cell.setAttribute("role", "gridcell");
+    cell.setAttribute("aria-label", `${formatDate(key)}: ${items.length} ${items.length === 1 ? "tarea" : "tareas"}${items.length ? `, estado ${worst === "ok" ? "en plazo" : worst === "yellow" ? "seguimiento" : worst === "orange" ? "próximo al límite" : "crítico"}` : ""}`);
 
-    const value = document.createElement("strong");
-    value.className = "category-count-value";
-    value.textContent = String(item.total);
+    const number = document.createElement("span");
+    number.className = "heatmap-day-number";
+    number.textContent = String(day);
+    cell.appendChild(number);
 
-    const track = document.createElement("span");
-    track.className = "category-count-bar-track";
-    track.setAttribute("aria-hidden", "true");
-    const fill = document.createElement("span");
-    fill.className = "category-count-bar-fill";
-    fill.style.backgroundColor = item.category.color || (item.category.groupId === "contabilidad" ? "#a58abd" : "#5b9b8d");
-    fill.style.height = item.total ? `${Math.max(4, (item.total / maximum) * 100)}%` : "0%";
-    track.appendChild(fill);
-
-    const label = document.createElement("span");
-    label.className = "category-count-label";
-    // El título conserva el nombre completo; el CSS lo trunca visualmente
-    // cuando hay muchas categorías o nombres largos.
-    label.textContent = item.category.name;
-    label.title = item.category.name;
-    label.setAttribute("aria-label", item.category.name);
-
-    column.append(value, track, label);
-    fragment.appendChild(column);
+    if (items.length) {
+      const count = document.createElement("span");
+      count.className = "heatmap-day-count";
+      count.textContent = String(items.length);
+      cell.appendChild(count);
+      const detail = items.map(({ task, category, level }) => {
+        const label = level === "ok" ? (task.completed ? "Completada" : "En plazo") : level === "yellow" ? "Seguimiento" : level === "orange" ? "Próximo al límite" : "Crítica";
+        return `${task.text} · ${category.name} · ${label}`;
+      });
+      cell.title = `${formatDate(key)}\n${detail.join("\n")}`;
+    } else {
+      cell.title = `${formatDate(key)} · Sin tareas`;
+    }
+    fragment.appendChild(cell);
   }
 
-  if (!sortedRows.length) {
-    const empty = document.createElement("div");
-    empty.className = "category-chart-empty";
-    empty.textContent = "Crea categorías para comenzar";
-    chart.appendChild(empty);
-  } else {
-    chart.replaceChildren(fragment);
+  calendar.replaceChildren(fragment);
+  calendar.setAttribute("aria-label", `Calendario de riesgo de ${monthLabel.textContent}. ${taskCountInMonth} tareas activas en el mes.`);
+  const nextButton = document.getElementById("heatmap-next-month");
+  if (nextButton) {
+    const current = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    nextButton.disabled = heatmapMonth >= current;
+    nextButton.title = nextButton.disabled ? "No hay meses futuros disponibles" : "Mes siguiente";
   }
-  chart.setAttribute("aria-label", `Gráfico de barras verticales con tareas activas por categoría. Total: ${activeTaskTotal} tareas.`);
 }
 
 // Actualiza el gráfico de torta de cada nivel de urgencia.
@@ -1851,6 +1886,10 @@ setInterval(() => {
     renderAll();
   }
 }, 30000);
+
+// Navegación del heatmap mensual. No modifica tareas ni datos de Supabase.
+document.getElementById("heatmap-prev-month")?.addEventListener("click", () => changeHeatmapMonth(-1));
+document.getElementById("heatmap-next-month")?.addEventListener("click", () => changeHeatmapMonth(1));
 
 // Primera carga: requiere sesión y obtiene los registros privados desde PostgreSQL.
 initializeCloudApp().catch(error => {
