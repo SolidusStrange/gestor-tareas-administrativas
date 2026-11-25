@@ -2492,6 +2492,13 @@ body.app-auth-pending .app-shell { visibility: hidden; }
 .heatmap-level-orange { background: #e88e43; color: #fff; }
 .heatmap-level-red { background: #d9565e; color: #fff; }
 .heatmap-level-empty { background: var(--heatmap-empty, #eef1f3); color: var(--muted, #89959d); }
+/* El borde identifica el día actual sin reemplazar el color del heatmap. */
+:root { --heatmap-today-border: #263b43; }
+.heatmap-day.heatmap-day-today {
+  border: 2px solid var(--heatmap-today-border);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
 .heatmap-footer {
   flex: 0 0 auto;
   display: flex;
@@ -2520,6 +2527,7 @@ body.app-auth-pending .app-shell { visibility: hidden; }
 
 :root[data-theme="dark"] {
   --heatmap-empty: #303a42;
+  --heatmap-today-border: #f3f7f9;
 }
 :root[data-theme="dark"] .heatmap-month-controls strong { color: #e2eaf0; }
 :root[data-theme="dark"] .heatmap-month-button { border-color: #3a4851; background: #263139; color: #dbe5ea; }

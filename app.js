@@ -744,9 +744,10 @@ function renderMonthlyHeatmap() {
     const items = tasksByDate.get(key) || [];
     const worst = items.reduce((current, item) => severity[item.level] > severity[current] ? item.level : current, "ok");
     const cell = document.createElement("div");
-    cell.className = `heatmap-day heatmap-level-${items.length ? worst : "empty"}`;
+    const isToday = key === dateKey();
+    cell.className = `heatmap-day heatmap-level-${items.length ? worst : "empty"}${isToday ? " heatmap-day-today" : ""}`;
     cell.setAttribute("role", "gridcell");
-    cell.setAttribute("aria-label", `${formatDate(key)}: ${items.length} ${items.length === 1 ? "tarea" : "tareas"}${items.length ? `, estado ${worst === "ok" ? "en plazo" : worst === "yellow" ? "seguimiento" : worst === "orange" ? "próximo al límite" : "crítico"}` : ""}`);
+    cell.setAttribute("aria-label", `${formatDate(key)}${isToday ? ", hoy" : ""}: ${items.length} ${items.length === 1 ? "tarea" : "tareas"}${items.length ? `, estado ${worst === "ok" ? "en plazo" : worst === "yellow" ? "seguimiento" : worst === "orange" ? "próximo al límite" : "crítico"}` : ""}`);
 
     const number = document.createElement("span");
     number.className = "heatmap-day-number";
@@ -762,9 +763,9 @@ function renderMonthlyHeatmap() {
         const label = level === "ok" ? (task.completed ? "Completada" : "En plazo") : level === "yellow" ? "Seguimiento" : level === "orange" ? "Próximo al límite" : "Crítica";
         return `${task.text} · ${category.name} · ${label}`;
       });
-      cell.title = `${formatDate(key)}\n${detail.join("\n")}`;
+      cell.title = `${formatDate(key)}${isToday ? " · HOY" : ""}\n${detail.join("\n")}`;
     } else {
-      cell.title = `${formatDate(key)} · Sin tareas`;
+      cell.title = `${formatDate(key)}${isToday ? " · HOY" : ""} · Sin tareas`;
     }
     fragment.appendChild(cell);
   }
