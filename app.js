@@ -6,18 +6,8 @@
 const STORAGE_KEY = "work-task-board-v2";
 const LEGACY_STORAGE_KEY = "work-task-board-v1";
 
-const DEFAULT_CATEGORIES = [
-  { id: "compras", name: "Compras", groupId: "operacional", daysLimit: 6, color: "#5b91a8", bg: "#edf4f7" },
-  { id: "ventas", name: "Ventas", groupId: "operacional", daysLimit: 2, color: "#4f9a89", bg: "#edf6f2" },
-  { id: "cashier", name: "Cashier", groupId: "operacional", daysLimit: 6, color: "#9a86b5", bg: "#f3eff7" },
-  { id: "rendiciones", name: "Rendiciones", groupId: "operacional", daysLimit: 6, color: "#bd8d55", bg: "#f8f2e9" },
-  { id: "propinas", name: "Propinas", groupId: "operacional", daysLimit: 6, color: "#b27b93", bg: "#f8f0f4" },
-  { id: "efectivo", name: "Efectivo", groupId: "operacional", daysLimit: 6, color: "#648f85", bg: "#edf4f1" },
-  { id: "factoring", name: "Factoring", groupId: "operacional", daysLimit: 6, color: "#8c8b62", bg: "#f3f3eb" },
-  { id: "pyg", name: "P&G", groupId: "contabilidad", daysLimit: 7, color: "#9b80ba", bg: "#f3eff7" },
-  { id: "balance-trimestral", name: "Balance trimestral", groupId: "contabilidad", daysLimit: 60, color: "#6695b2", bg: "#eef4f7" },
-  { id: "extras", name: "Extras", groupId: "contabilidad", daysLimit: 1, color: "#b48d55", bg: "#f8f3e9" }
-];
+// V4.4: no se precargan subcategorías. Cada usuario crea las suyas.
+const DEFAULT_CATEGORIES = [];
 
 const CHART_COLORS = ["#5b9b8d", "#70aaa1", "#8bb9b4", "#a48ac0", "#b49bc9", "#d29a68", "#d8b26b", "#719db7", "#8aabb9", "#9c9b7b", "#c5869b", "#7e9d83"];
 const categoryGrid = document.getElementById("group-sections");
@@ -615,6 +605,12 @@ function renderDashboard() {
   operationalTarget.replaceChildren();
   const operationalCategories = sortCategoriesByUrgency(state.categories.filter(category => category.groupId === "operacional"));
   for (const category of operationalCategories) operationalTarget.appendChild(renderCategory(category));
+  if (!operationalCategories.length) {
+    const empty = document.createElement("div");
+    empty.className = "operational-empty-state";
+    empty.textContent = "Aún no hay categorías operacionales. Usa + Categoría para crear la primera.";
+    operationalTarget.appendChild(empty);
+  }
 
   accountingList.replaceChildren();
   const accountingEntries = allActiveTasks().filter(({ category }) => category.groupId === "contabilidad");
@@ -679,20 +675,9 @@ function renderCategoryBarChart() {
   const maximum = Math.max(1, ...rows.map(item => item.total));
   const sortedRows = rows.sort((a, b) => b.total - a.total || a.originalIndex - b.originalIndex);
   const fragment = document.createDocumentFragment();
+  chart.replaceChildren();
 
-  // Abreviaturas cortas para que las diez etiquetas sean legibles bajo las barras.
-  const shortNames = {
-    "Rendiciones": "Rend.",
-    "Factoring": "Factor.",
-    "Balance trimestral": "Balance",
-    "Efectivo": "Efectivo",
-    "Compras": "Compras",
-    "Ventas": "Ventas",
-    "Cashier": "Cashier",
-    "Propinas": "Propinas",
-    "P&G": "P&G",
-    "Extras": "Extras"
-  };
+  // V4.4: el gráfico usa nombres reales y dinámicos, no un catálogo fijo.
 
   for (const item of sortedRows) {
     const column = document.createElement("div");
@@ -715,14 +700,21 @@ function renderCategoryBarChart() {
 
     const label = document.createElement("span");
     label.className = "category-count-label";
-    label.textContent = shortNames[item.category.name] || item.category.name;
+    label.textContent = item.category.name;
     label.title = item.category.name;
 
     column.append(value, track, label);
     fragment.appendChild(column);
   }
 
-  chart.replaceChildren(fragment);
+  if (!sortedRows.length) {
+    const empty = document.createElement("div");
+    empty.className = "category-chart-empty";
+    empty.textContent = "Crea categorías para comenzar";
+    chart.appendChild(empty);
+  } else {
+    chart.replaceChildren(fragment);
+  }
   chart.setAttribute("aria-label", `Gráfico de barras verticales con tareas activas por categoría. Total: ${activeTaskTotal} tareas.`);
 }
 

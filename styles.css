@@ -1379,6 +1379,15 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   align-items: center;
   gap: 7px;
 }
+.category-chart-empty {
+  grid-column: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  padding: 14px;
+  color: var(--muted, #8a969f);
+  font-size: 12px;
+  text-align: center;
+}
 .category-count-label {
   overflow: hidden;
   color: #596872;
@@ -1554,7 +1563,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .category-count-card { display: flex; flex-direction: column; }
 .category-count-chart {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
   grid-auto-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 5px;
@@ -1565,7 +1574,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .category-count-column {
   min-width: 0;
   display: grid;
-  grid-template-rows: 14px minmax(0, 1fr) 22px;
+  grid-template-rows: 16px minmax(0, 1fr) minmax(26px, auto);
   justify-items: center;
   align-items: end;
   gap: 3px;
@@ -1597,15 +1606,15 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 }
 .category-count-label {
   width: 100%;
-  height: 22px;
+  min-height: 26px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   color: #66747d;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 500;
-  line-height: 1.1;
+  line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -1762,26 +1771,26 @@ body.app-auth-pending .app-shell { visibility: hidden; }
   /* Títulos y detalles de las áreas */
   --ui-area-title: 16px;
   --ui-area-subtitle: 10px;
-  --ui-category-title: 13px;
-  --ui-category-meta: 10px;
-  --ui-category-summary: 10px;
+  --ui-category-title: 16px;
+  --ui-category-meta: 13px;
+  --ui-category-summary: 12px;
 
   /* Tareas de Operacional */
-  --ui-task-name: 13px;
-  --ui-task-date: 10px;
+  --ui-task-name: 16px;
+  --ui-task-date: 12px;
   --ui-task-completion: 10.5px;
   --ui-quick-input: 11px;
   --ui-quick-date: 10px;
 
   /* Tareas de Contabilidad */
-  --ui-accounting-task-name: 13px;
-  --ui-accounting-subtitle: 10px;
+  --ui-accounting-task-name: 16px;
+  --ui-accounting-subtitle: 12px;
 
   /* Gráficos y resumen superior */
   --ui-chart-heading: 14px;
   --ui-chart-kicker: 8px;
   --ui-chart-value: 10px;
-  --ui-chart-label: 9px;
+  --ui-chart-label: 10.5px;
   --ui-risk-label: 10px;
   --ui-risk-detail: 9px;
 
@@ -1912,19 +1921,19 @@ body.app-auth-pending .app-shell { visibility: hidden; }
     --ui-breadcrumb: 10px;
     --ui-area-title: 15px;
     --ui-area-subtitle: 9px;
-    --ui-category-title: 12px;
-    --ui-category-meta: 9px;
-    --ui-category-summary: 9px;
-    --ui-task-name: 12px;
-    --ui-task-date: 9px;
+    --ui-category-title: 14px;
+    --ui-category-meta: 11px;
+    --ui-category-summary: 10px;
+    --ui-task-name: 13px;
+    --ui-task-date: 10px;
     --ui-task-completion: 10px;
     --ui-quick-input: 11px;
     --ui-quick-date: 9px;
-    --ui-accounting-task-name: 12px;
-    --ui-accounting-subtitle: 9px;
+    --ui-accounting-task-name: 13px;
+    --ui-accounting-subtitle: 10px;
     --ui-chart-heading: 13px;
     --ui-chart-value: 9px;
-    --ui-chart-label: 8px;
+    --ui-chart-label: 9px;
     --ui-risk-label: 9px;
     --ui-risk-detail: 8px;
     --ui-form-label: 11px;
@@ -1937,11 +1946,11 @@ body.app-auth-pending .app-shell { visibility: hidden; }
 
 @media (max-width: 420px) {
   :root {
-    --ui-task-name: 11.5px;
-    --ui-task-date: 8.5px;
+    --ui-task-name: 12.5px;
+    --ui-task-date: 9.5px;
     --ui-task-completion: 9.5px;
-    --ui-accounting-task-name: 11.5px;
-    --ui-accounting-subtitle: 8.5px;
+    --ui-accounting-task-name: 12.5px;
+    --ui-accounting-subtitle: 9.5px;
     --ui-category-title: 11.5px;
   }
 }
@@ -2277,4 +2286,27 @@ body.app-auth-pending .app-shell { visibility: hidden; }
   .theme-toggle { width: 34px; min-width: 34px; height: 34px; padding: 0; gap: 0; }
   .theme-toggle-label { display: none; }
   .topbar-actions { gap: 8px; }
+}
+
+/* V4.4 — Estados vacíos y tipografía ampliada en tarjetas. */
+.operational-empty-state {
+  grid-column: 1 / -1;
+  padding: 18px 12px;
+  border: 1px dashed var(--border, #d8e0e5);
+  border-radius: 10px;
+  color: var(--muted, #7e8c96);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.operational-panel .category-empty-note,
+.accounting-panel .accounting-empty-note {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.category-count-label { font-size: 10.5px; }
+
+@media (max-width: 620px) {
+  .operational-empty-state { font-size: 12px; padding: 14px 9px; }
+  .operational-panel .category-empty-note,
+  .accounting-panel .accounting-empty-note { font-size: 11.5px; }
 }

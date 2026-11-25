@@ -103,3 +103,39 @@ Reemplaza `index.html`, `styles.css`, `app.js` y `README.md` en la raíz del rep
 ### Actualización de GitHub Pages
 
 Reemplaza `index.html`, `login.html`, `styles.css`, `login.css` y agrega el nuevo `theme.js` en la raíz del repositorio. Conserva `app.js`, `auth.js`, `supabase-config.js` y `.nojekyll`. No ejecutes SQL: esta versión no modifica PostgreSQL, RLS ni la autenticación.
+
+
+## V4.4 — Categorías dinámicas y tipografía ampliada
+
+- Nuevos usuarios parten con cero categorías: se mantienen solo las áreas Operacional y Contabilidad.
+- Las subcategorías se crean manualmente con nombre, área y plazo en días.
+- Se evita la duplicidad de nombres de categoría (validación en la aplicación y restricción de base de datos).
+- El gráfico de barras se genera a partir de las categorías existentes; no contiene nombres predefinidos ni una cantidad fija de columnas.
+- Los nombres del gráfico se muestran completos y las columnas se adaptan al número de categorías.
+- Aumenta el tamaño de textos de tareas, categorías, fechas y leyendas para pantallas grandes, conservando ajustes responsive.
+- Los datos existentes en Supabase se conservan. Las categorías existentes con tareas no se eliminan automáticamente.
+
+### Migración Supabase (ejecutar una vez)
+
+Ejecuta `03_migration_dynamic_categories.sql` en SQL Editor. Esta migración detiene la creación automática de categorías predeterminadas para cuentas nuevas y elimina solo categorías antiguas que no tengan tareas asociadas. Categorías con tareas activas o archivadas se conservan.
+
+No borra tareas, no cambia usuarios ni políticas RLS.
+
+
+## V4.4 — Subcategorías dinámicas y tipografía ampliada
+
+- Nuevos usuarios comienzan con cero subcategorías; solo existen las áreas Operacional y Contabilidad.
+- Las categorías se crean desde la UI con nombre, área y plazo de urgencia.
+- La aplicación valida que no se repita el nombre de una categoría en la misma cuenta. La restricción unique de PostgreSQL también previene duplicados.
+- El gráfico de barras depende de las categorías existentes: no usa un listado fijo de etiquetas ni diez columnas predefinidas.
+- Se muestran nombres completos en el gráfico; el layout adapta sus columnas al número de categorías.
+- Se aumentan nombres de tareas, categorías, fechas y textos vacíos para mejorar la lectura en monitores grandes.
+- Los datos existentes se conservan; las categorías con tareas no se borran automáticamente.
+
+### Migración de Supabase
+
+Ejecuta una vez el archivo `03_migration_dynamic_categories.sql` en Supabase SQL Editor. Desactiva la creación automática de categorías iniciales para nuevos usuarios y elimina únicamente categorías legacy que no tengan tareas asociadas. Las categorías con tareas activas o archivadas se conservan. No elimina usuarios, tareas ni políticas RLS.
+
+### Publicar V4.4
+
+Reemplaza `index.html`, `styles.css`, `app.js` y `README.md` en el repositorio GitHub. Conserva `login.html`, `login.css`, `auth.js`, `supabase-config.js`, `theme.js` y `.nojekyll`. Ejecuta la migración SQL antes de probar con cuentas nuevas.
