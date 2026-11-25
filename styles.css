@@ -2540,3 +2540,99 @@ body.app-auth-pending .app-shell { visibility: hidden; }
   .heatmap-day { min-height: 17px; padding: 2px 4px; font-size: 9.5px; }
   .heatmap-day-count { font-size: 8px; }
 }
+
+
+/* ========================================================================== */
+/* V4.7 — CABECERA MÁS LIMPIA, ANALÍTICA AMPLIADA Y CONTABILIDAD UNIFICADA.   */
+/* ========================================================================== */
+.topbar {
+  justify-content: space-between;
+}
+.topbar-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+.topbar-left .today-display {
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  padding-left: 17px;
+  border-left: 1px solid var(--line, #e4e9ed);
+}
+.topbar-left .today-label {
+  color: var(--muted, #82909a);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+.topbar-left .user-email-label {
+  max-width: 260px;
+  color: var(--muted, #82909a);
+  font-size: 12px;
+}
+.topbar-left .today-display strong {
+  color: var(--ink, #42505a);
+  font-size: 13px;
+}
+.topbar-actions { margin-left: auto; }
+
+/* Más espacio para leer las tarjetas superiores y el calendario heatmap. */
+.dashboard-top-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.32fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.dashboard-top-grid > .dashboard-top-card {
+  min-height: 250px;
+  height: 250px;
+  padding: 17px 18px 15px;
+}
+.dashboard-top-grid .overview-title-wrap h2,
+.dashboard-top-grid .widget-heading h2 { font-size: 17px; }
+.dashboard-top-grid .overview-title-wrap .section-kicker,
+.dashboard-top-grid .widget-heading .section-kicker { font-size: 10px; }
+.dashboard-top-grid .overview-total strong { font-size: 29px; }
+.dashboard-top-grid .overview-total span { font-size: 11px; }
+.dashboard-top-grid .group-progress-name,
+.dashboard-top-grid .group-progress-copy strong { font-size: 12px; }
+.dashboard-top-grid .group-progress-detail { font-size: 11px; }
+.dashboard-top-grid .status-donut-copy > strong { font-size: 14px; }
+.dashboard-top-grid .status-donut-copy > span { font-size: 12px; }
+.dashboard-top-grid .heatmap-month-controls strong { font-size: 14px; }
+.dashboard-top-grid .heatmap-weekdays span { font-size: 12px; }
+.dashboard-top-grid .heatmap-day { min-height: 21px; font-size: 12px; padding: 2px 5px; }
+.dashboard-top-grid .heatmap-day-count { font-size: 10.5px; }
+.dashboard-top-grid .heatmap-month-total { font-size: 11px; }
+.dashboard-top-grid .heatmap-legend { justify-content: flex-start; gap: 7px 12px; }
+.dashboard-top-grid .heatmap-legend span { font-size: 11px; gap: 5px; }
+.dashboard-top-grid .heatmap-swatch { width: 10px; height: 10px; flex-basis: 10px; }
+
+/* Contabilidad es un panel único: se oculta la gestión de categorías. */
+.accounting-panel .add-category-inline { display: none !important; }
+.accounting-panel .group-heading-main p { font-size: 11px; }
+.accounting-panel .accounting-task-name { font-weight: 500 !important; }
+.accounting-panel .accounting-task-subtitle { font-size: 12px; }
+.accounting-panel .accounting-list { gap: 1px; }
+.accounting-panel .accounting-empty-note { font-size: 13px; }
+
+@media (max-width: 1100px) {
+  .dashboard-top-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dashboard-top-grid > .monthly-heatmap-card { grid-column: 1 / -1; }
+  .dashboard-top-grid > .dashboard-top-card { height: auto; min-height: 224px; }
+}
+@media (max-width: 760px) {
+  .topbar-left { gap: 10px; }
+  .topbar-left .today-display { padding-left: 10px; gap: 5px; }
+  .topbar-left .user-email-label { max-width: 125px; font-size: 10px; }
+  .topbar-left .today-display strong { font-size: 11px; }
+  .topbar-left .today-label { font-size: 8px; }
+  .dashboard-top-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-top-grid > .monthly-heatmap-card { grid-column: auto; }
+  .dashboard-top-grid > .dashboard-top-card { min-height: 214px; height: auto; }
+  .dashboard-top-grid .heatmap-legend span { font-size: 10px; }
+}

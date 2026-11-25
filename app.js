@@ -8,6 +8,22 @@ const LEGACY_STORAGE_KEY = "work-task-board-v1";
 
 // V4.4: no se precargan subcategorías. Cada usuario crea las suyas.
 const DEFAULT_CATEGORIES = [];
+// Categoría técnica, invisible para el usuario, que permite guardar las tareas
+// de Contabilidad usando la FK category_id actual sin exponer subcategorías.
+const ACCOUNTING_BUCKET_NAME = "__CONTABILIDAD_GENERAL__";
+const ACCOUNTING_DEFAULT_DEADLINE = 6;
+
+function isAccountingBucket(category) {
+  return Boolean(category && category.groupId === "contabilidad" && category.name === ACCOUNTING_BUCKET_NAME);
+}
+
+function getAccountingBucket() {
+  return state.categories.find(isAccountingBucket) || null;
+}
+
+function getDisplayCategoryName(category) {
+  return isAccountingBucket(category) || category?.groupId === "contabilidad" ? "Contabilidad" : (category?.name || "Categoría anterior");
+}
 
 const CHART_COLORS = ["#5b9b8d", "#70aaa1", "#8bb9b4", "#a48ac0", "#b49bc9", "#d29a68", "#d8b26b", "#719db7", "#8aabb9", "#9c9b7b", "#c5869b", "#7e9d83"];
 const categoryGrid = document.getElementById("group-sections");
@@ -359,8 +375,10 @@ function updateOverview() {
       accountingFill.style.backgroundColor = progressColor(percent);
       document.getElementById("accounting-panel-progress-detail").textContent = `${done} de ${summary.tasks.length} completadas`;
     }
-    const categoriesInGroup = state.categories.filter(category => category.groupId === summary.id);
-    document.getElementById(`${summary.key}-summary`).textContent = `${categoriesInGroup.length} categorías · ${summary.tasks.length} tareas`;
+    const categoriesInGroup = state.categories.filter(category => category.groupId === summary.id && !isAccountingBucket(category));
+    document.getElementById(`${summary.key}-summary`).textContent = summary.id === "contabilidad"
+      ? `${summary.tasks.length} tareas`
+      : `${categoriesInGroup.length} categorías · ${summary.tasks.length} tareas`;
   }
   document.getElementById("nav-archived-count").textContent = state.archived.length;
 }
@@ -561,7 +579,7 @@ function renderAccountingTask(task, category, urgency) {
   checkbox.dataset.categoryId = category.id;
   checkbox.setAttribute("aria-label", `${task.completed ? "Marcar pendiente" : "Completar"}: ${task.text}`);
   row.querySelector(".accounting-task-name").textContent = task.text;
-  row.querySelector(".accounting-task-subtitle").textContent = `${category.name} · ${formatDate(task.dueDate)}`;
+  row.querySelector(".accounting-task-subtitle").textContent = `Contabilidad · ${formatDate(task.dueDate)}`;
   if (task.completedAt) {
     const completedAt = document.createElement("small");
     completedAt.className = "accounting-task-completion";
@@ -580,22 +598,26 @@ function refreshDashboardQuickCategoryOptions() {
   const previousCategory = select.value;
   select.replaceChildren(new Option("Seleccionar categoría", ""));
 
-  for (const [groupId, label] of [["operacional", "Operacional"], ["contabilidad", "Contabilidad"]]) {
-    const categories = state.categories.filter(category => category.groupId === groupId);
-    if (!categories.length) continue;
+  const operationalCategories = state.categories.filter(category => category.groupId === "operacional" && !isAccountingBucket(category));
+  if (operationalCategories.length) {
     const group = document.createElement("optgroup");
-    group.label = label;
-    for (const category of categories) {
-      group.appendChild(new Option(category.name, category.id));
-    }
+    group.label = "Operacional";
+    for (const category of operationalCategories) group.appendChild(new Option(category.name, category.id));
     select.appendChild(group);
   }
 
-  if (state.categories.some(category => category.id === previousCategory)) {
-    select.value = previousCategory;
-  } else {
-    select.value = "";
+  // Contabilidad aparece como un único destino lógico; la categoría técnica
+  // permanece oculta y se crea automáticamente por usuario al conectar.
+  const accountingBucket = getAccountingBucket();
+  if (accountingBucket) {
+    const group = document.createElement("optgroup");
+    group.label = "Contabilidad";
+    group.appendChild(new Option("Contabilidad", accountingBucket.id));
+    select.appendChild(group);
   }
+
+  if ([...select.options].some(option => option.value === previousCategory)) select.value = previousCategory;
+  else select.value = "";
 
   const dateInput = document.getElementById("dashboard-quick-date");
   if (!dateInput.value) dateInput.value = formatDate(dateKey());
@@ -605,7 +627,7 @@ function refreshDashboardQuickCategoryOptions() {
 function renderDashboard() {
   const operationalTarget = document.getElementById("operacional-categories");
   operationalTarget.replaceChildren();
-  const operationalCategories = sortCategoriesByUrgency(state.categories.filter(category => category.groupId === "operacional"));
+  const operationalCategories = sortCategoriesByUrgency(state.categories.filter(category => category.groupId === "operacional" && !isAccountingBucket(category)));
   for (const category of operationalCategories) operationalTarget.appendChild(renderCategory(category));
   if (!operationalCategories.length) {
     const empty = document.createElement("div");
@@ -617,6 +639,7 @@ function renderDashboard() {
   accountingList.replaceChildren();
   const accountingEntries = allActiveTasks().filter(({ category }) => category.groupId === "contabilidad");
   const sortedAccountingEntries = sortTaskEntries(accountingEntries);
+  document.getElementById("accounting-summary").textContent = `${accountingEntries.length} tareas`;
   for (const item of sortedAccountingEntries) accountingList.appendChild(renderAccountingTask(item.task, item.category, item.urgency));
   if (!sortedAccountingEntries.length) {
     const empty = document.createElement("div");
@@ -777,24 +800,32 @@ function renderRiskMetric(level, count, pendingTotal) {
 //    Tabla general con búsqueda, filtros y creación desde un solo formulario.
 // ============================================================================
 function updateTaskCategoryOptions(selectElement, groupId, selectedCategoryId = null) {
-  const available = state.categories.filter(category => category.groupId === groupId);
+  const available = state.categories.filter(category => category.groupId === groupId && !isAccountingBucket(category));
   selectElement.replaceChildren();
-  if (!available.length) {
-    const option = document.createElement("option");
-    option.value = "";
-    option.textContent = "No hay categorías en esta área";
+  const fieldId = selectElement.id === "new-task-category" ? "new-task-category-field" : "edit-task-category-field";
+  const field = document.getElementById(fieldId);
+
+  if (groupId === "contabilidad") {
+    // Contabilidad no tiene subcategorías visibles. Se asigna internamente al
+    // contenedor técnico y se oculta el selector de categoría del formulario.
+    const selectedLegacy = state.categories.find(category => category.id === selectedCategoryId && category.groupId === "contabilidad");
+    const target = selectedLegacy || getAccountingBucket();
+    const option = new Option("Contabilidad", target?.id || "");
     selectElement.appendChild(option);
+    if (!target) option.textContent = "Contabilidad (preparando área…)";
+    selectElement.required = false;
+    if (field) field.classList.add("hidden");
     return;
   }
-  for (const category of available) {
-    const option = document.createElement("option");
-    option.value = category.id;
-    option.textContent = category.name;
-    selectElement.appendChild(option);
+
+  if (field) field.classList.remove("hidden");
+  selectElement.required = true;
+  if (!available.length) {
+    selectElement.appendChild(new Option("Primero crea una categoría operacional", ""));
+    return;
   }
-  if (selectedCategoryId && available.some(category => category.id === selectedCategoryId)) {
-    selectElement.value = selectedCategoryId;
-  }
+  for (const category of available) selectElement.appendChild(new Option(category.name, category.id));
+  if (selectedCategoryId && available.some(category => category.id === selectedCategoryId)) selectElement.value = selectedCategoryId;
 }
 
 function refreshCategoryFilterOptions() {
@@ -1008,7 +1039,7 @@ function archiveTask(categoryId, taskId) {
   const index = tasks.findIndex(task => task.id === taskId);
   if (index === -1) return;
   const [task] = tasks.splice(index, 1);
-  state.archived.push({ ...task, categoryId, categoryName: category.name, groupId: category.groupId, archivedAt: formatTimestamp() });
+  state.archived.push({ ...task, categoryId, categoryName: getDisplayCategoryName(category), groupId: category.groupId, archivedAt: formatTimestamp() });
   saveState();
   renderAll();
 }
@@ -1032,8 +1063,12 @@ function restoreTask(taskId, categoryId) {
   const index = state.archived.findIndex(item => item.id === taskId);
   if (index === -1) return;
   const archived = state.archived[index];
-  const targetCategoryId = state.categories.some(category => category.id === categoryId) ? categoryId : state.categories[0]?.id;
-  if (!targetCategoryId) return;
+  const existingCategory = state.categories.find(category => category.id === categoryId);
+  const targetCategoryId = existingCategory?.id || (archived.groupId === "contabilidad" ? getAccountingBucket()?.id : state.categories.find(category => category.groupId === "operacional" && !isAccountingBucket(category))?.id);
+  if (!targetCategoryId) {
+    window.alert("Crea primero una categoría operacional para restaurar esta tarea.");
+    return;
+  }
   const { categoryId: oldCategoryId, categoryName, groupId, archivedAt, ...task } = archived;
   state.tasks[targetCategoryId] ||= [];
   state.tasks[targetCategoryId].push(task);
@@ -1060,7 +1095,7 @@ function moveTask(taskId, fromCategoryId, toCategoryId, targetTaskId = null) {
 // Cambia una categoría de grupo y/o posición en la distribución del dashboard.
 function moveCategory(categoryId, targetGroupId, targetCategoryId = null) {
   const index = state.categories.findIndex(category => category.id === categoryId);
-  if (index === -1 || !["operacional", "contabilidad"].includes(targetGroupId)) return;
+  if (index === -1 || targetGroupId !== "operacional" || state.categories[index].groupId !== "operacional" || isAccountingBucket(state.categories[index])) return;
   if (targetCategoryId === categoryId && state.categories[index].groupId === targetGroupId) return;
   const [category] = state.categories.splice(index, 1);
   category.groupId = targetGroupId;
@@ -1091,7 +1126,7 @@ function openTaskEditor(categoryId, taskId) {
 // Crea una subcategoría y la incorpora a la estructura existente sin borrar tareas.
 function createCategory(name, groupId, daysLimit) {
   const cleanName = name.trim().slice(0, 40);
-  if (!cleanName || !["operacional", "contabilidad"].includes(groupId)) return false;
+  if (!cleanName || groupId !== "operacional" || cleanName.toLocaleLowerCase("es-CL") === ACCOUNTING_BUCKET_NAME.toLocaleLowerCase("es-CL")) return false;
   if (state.categories.some(category => category.name.toLocaleLowerCase("es-CL") === cleanName.toLocaleLowerCase("es-CL"))) {
     alert("Ya existe una categoría con ese nombre en tu cuenta.");
     return false;
@@ -1224,7 +1259,8 @@ categoryGrid.addEventListener("click", event => {
   const addCategory = event.target.closest("[data-add-category]");
   if (addCategory) {
     document.getElementById("new-category-name").value = "";
-    document.getElementById("new-category-group").value = addCategory.dataset.addCategory;
+    if (addCategory.dataset.addCategory !== "operacional") return;
+    document.getElementById("new-category-group").value = "operacional";
     document.getElementById("new-category-days").value = "6";
     categoryDialog.showModal();
     document.getElementById("new-category-name").focus();
@@ -1299,7 +1335,7 @@ document.getElementById("task-delete-button").addEventListener("click", () => {
 document.getElementById("category-create-form").addEventListener("submit", event => {
   event.preventDefault();
   const name = document.getElementById("new-category-name").value;
-  const groupId = document.getElementById("new-category-group").value;
+  const groupId = "operacional";
   const daysLimit = Number(document.getElementById("new-category-days").value);
   if (!name.trim() || !Number.isInteger(daysLimit) || daysLimit < 1 || daysLimit > 3650) return;
   if (createCategory(name, groupId, daysLimit)) {
@@ -1375,12 +1411,12 @@ categoryGrid.addEventListener("drop", event => {
   if (!targetCard && !targetGroup) return;
   event.preventDefault();
   if (dragPayload.type === "task") {
-    const destinationCategory = targetCard?.dataset.categoryId || state.categories.find(category => category.groupId === targetGroup?.dataset.groupId)?.id;
+    const destinationCategory = targetCard?.dataset.categoryId || (targetGroup?.dataset.groupId === "contabilidad" ? getAccountingBucket()?.id : state.categories.find(category => category.groupId === "operacional" && !isAccountingBucket(category))?.id);
     const targetRow = event.target.closest(".task-item");
     if (destinationCategory) moveTask(dragPayload.taskId, dragPayload.fromCategoryId, destinationCategory, targetRow?.dataset.taskId || null);
   } else if (dragPayload.type === "category") {
     const groupId = targetGroup?.dataset.groupId;
-    moveCategory(dragPayload.categoryId, groupId, targetCard?.dataset.categoryId || null);
+    if (groupId === "operacional") moveCategory(dragPayload.categoryId, groupId, targetCard?.dataset.categoryId || null);
   }
   dragPayload = null;
   clearDragStyles();
@@ -1511,8 +1547,33 @@ async function fetchCloudRows() {
     .from("categories").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
   if (categoriesError) throw categoriesError;
 
-  // V4.5: las categorías son totalmente dinámicas. No se insertan valores
-  // predeterminados desde el cliente; cada usuario crea las suyas.
+  // V4.7: Contabilidad tiene un solo panel, no subcategorías visibles. Para
+  // respetar la FK tasks.category_id se usa un registro técnico oculto por usuario.
+  let accountingBucket = (categories || []).find(row => row.name === ACCOUNTING_BUCKET_NAME && row.area === "contabilidad");
+  if (!accountingBucket) {
+    const bucketPayload = {
+      user_id: currentUser.id,
+      name: ACCOUNTING_BUCKET_NAME,
+      area: "contabilidad",
+      deadline_days: ACCOUNTING_DEFAULT_DEADLINE,
+      sort_order: 2147483000,
+      color: "#a48ac0",
+      bg: "#f0eaf5"
+    };
+    const { data: createdBucket, error: createBucketError } = await supabaseClient
+      .from("categories").insert(bucketPayload).select("*").single();
+    if (createBucketError) {
+      // Un inicio paralelo en otra pestaña puede crear el mismo bucket primero.
+      if (createBucketError.code !== "23505") throw createBucketError;
+      const { data: foundBucket, error: lookupError } = await supabaseClient
+        .from("categories").select("*").eq("user_id", currentUser.id).eq("name", ACCOUNTING_BUCKET_NAME).single();
+      if (lookupError) throw lookupError;
+      accountingBucket = foundBucket;
+    } else {
+      accountingBucket = createdBucket;
+    }
+    categories = [...(categories || []), accountingBucket];
+  }
 
   const { data: tasks, error: tasksError } = await supabaseClient
     .from("tasks").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
