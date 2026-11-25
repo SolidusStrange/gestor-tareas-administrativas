@@ -63,4 +63,4 @@ La base de datos permanece en Supabase. Actualizar GitHub Pages no elimina ni re
 
 - `supabase-config.js` contiene únicamente la URL del proyecto y una publishable key, diseñadas para estar en el frontend.
 - Nunca agregues una `sb_secret_`, `service_role` ni la contraseña de PostgreSQL al repositorio.
-- La privacidad de los registros depende de las políticas RLS activas en `categories` y `tasks`.
+- La privacidad de los registros depende de las políticas RLS activas en `categories` y `tasks`
